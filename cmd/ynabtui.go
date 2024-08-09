@@ -8,17 +8,19 @@ import (
 
 func main() {
 
-	budgetId, err := settings.ReadDefaultBudgetId()
-	if err != nil {
-		panic(err)
-	}
-
 	token, err := settings.ReadAccessToken()
 	if err != nil {
 		panic(err)
 	}
 
-	budgets, err := ynabclient.ReadBudgets(token)
+	client := ynabclient.NewClient(token)
+
+	budgetId, err := settings.ReadDefaultBudgetId()
+	if err != nil {
+		panic(err)
+	}
+
+	budgets, err := client.ReadBudgets()
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	transactions, err := ynabclient.ReadTransactions(token, budgetId, sinceDate)
+	transactions, err := client.ReadTransactions(budgetId, sinceDate)
 	if err != nil {
 		panic(err)
 	}

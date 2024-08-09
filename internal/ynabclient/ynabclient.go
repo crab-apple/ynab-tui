@@ -7,12 +7,20 @@ import (
 	"net/http"
 )
 
-func ReadBudgets(token string) (string, error) {
+type YnabClient struct {
+	token string
+}
+
+func NewClient(token string) YnabClient {
+	return YnabClient{token: token}
+}
+
+func (c YnabClient) ReadBudgets() (string, error) {
 
 	client := http.Client{}
 
 	req, err := http.NewRequest("GET", "https://api.ynab.com/v1/budgets", nil)
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -29,7 +37,7 @@ func ReadBudgets(token string) (string, error) {
 
 	return string(body), nil
 }
-func ReadTransactions(token string, budgetId string, since date.Date) (string, error) {
+func (c YnabClient) ReadTransactions(budgetId string, since date.Date) (string, error) {
 
 	client := http.Client{}
 
@@ -37,7 +45,7 @@ func ReadTransactions(token string, budgetId string, since date.Date) (string, e
 	if err != nil {
 		return "", fmt.Errorf("error while reading transactions,  %w", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	q := req.URL.Query()
 	q.Add("since_date", since.String())
 	req.URL.RawQuery = q.Encode()
