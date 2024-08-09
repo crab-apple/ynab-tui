@@ -17,29 +17,39 @@ func NewClient(token string) YnabClient {
 
 func (c YnabClient) ReadBudgets() (string, error) {
 
-	req, err := http.NewRequest("GET", "https://api.ynab.com/v1/budgets", nil)
+	r, err := c.doRequest("https://api.ynab.com/v1/budgets", nil)
 	if err != nil {
 		return "", fmt.Errorf("error while reading budgets,  %w", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
-
-	return c.doRequest(req)
+	return r, nil
 }
 func (c YnabClient) ReadTransactions(budgetId string, since date.Date) (string, error) {
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.ynab.com/v1/budgets/%s/transactions", budgetId), nil)
+	r, err := c.doRequest(fmt.Sprintf("https://api.ynab.com/v1/budgets/%s/transactions", budgetId), map[string]string{
+		"since_date": since.String(),
+	})
 	if err != nil {
 		return "", fmt.Errorf("error while reading transactions,  %w", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
-	q := req.URL.Query()
-	q.Add("since_date", since.String())
-	req.URL.RawQuery = q.Encode()
-
-	return c.doRequest(req)
+	return r, nil
 }
 
-func (c YnabClient) doRequest(req *http.Request) (string, error) {
+func (c YnabClient) doRequest(path string, query map[string]string) (string, error) {
+
+	req, err := http.NewRequest("GET", path, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if query != nil {
+		q := req.URL.Query()
+		for k, v := range query {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
 
 	client := http.Client{}
 
