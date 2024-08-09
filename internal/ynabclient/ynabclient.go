@@ -1,4 +1,4 @@
-package main
+package ynabclient
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func readAccessToken() (string, error) {
+func ReadAccessToken() (string, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to read access token: %w", err)
@@ -22,7 +22,7 @@ func readAccessToken() (string, error) {
 	return strings.TrimSpace(string(contents)), nil
 }
 
-func readBudgets(token string) (string, error) {
+func ReadBudgets(token string) (string, error) {
 
 	client := http.Client{}
 
