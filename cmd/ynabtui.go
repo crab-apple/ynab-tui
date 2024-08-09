@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/rickb777/date/v2"
 	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabclient"
 )
@@ -22,7 +23,13 @@ func main() {
 		panic(err)
 	}
 
-	transactions, err := ynabclient.ReadTransactions(token, budgetId)
+	// Only get transactions form the past couple days
+	sinceDate := date.TodayUTC().AddDate(0, 0, -2)
+	if err != nil {
+		panic(err)
+	}
+
+	transactions, err := ynabclient.ReadTransactions(token, budgetId, sinceDate)
 	if err != nil {
 		panic(err)
 	}
