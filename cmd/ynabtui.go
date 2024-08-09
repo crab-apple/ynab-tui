@@ -1,12 +1,18 @@
 package main
 
 import (
+	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabclient"
 )
 
 func main() {
 
-	token, err := ynabclient.ReadAccessToken()
+	budgetId, err := settings.ReadDefaultBudgetId()
+	if err != nil {
+		panic(err)
+	}
+
+	token, err := settings.ReadAccessToken()
 	if err != nil {
 		panic(err)
 	}
@@ -16,5 +22,11 @@ func main() {
 		panic(err)
 	}
 
+	transactions, err := ynabclient.ReadTransactions(token, budgetId)
+	if err != nil {
+		panic(err)
+	}
+
 	println(budgets)
+	println(transactions)
 }
