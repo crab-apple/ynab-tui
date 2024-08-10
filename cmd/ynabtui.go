@@ -1,13 +1,24 @@
 package main
 
 import (
+	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rickb777/date/v2"
 	"log/slog"
+	"os"
+	"ynabtui/internal/model"
 	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabclient"
 )
 
 func main() {
+	p := tea.NewProgram(model.InitialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
+	}
+}
+func fetchDataFromYnabExample() {
 
 	token, err := settings.ReadAccessToken()
 	if err != nil {
