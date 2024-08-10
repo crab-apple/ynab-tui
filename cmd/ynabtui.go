@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rickb777/date/v2"
+	"log/slog"
 	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabclient"
 )
@@ -27,6 +28,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	slog.Info("Fetched budgets", "budgets", budgets)
 
 	// Only get transactions form the past couple days
 	sinceDate := date.TodayUTC().AddDate(0, 0, -2)
@@ -38,7 +40,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	println(budgets)
-	println(transactions)
+	slog.Info("Fetched transactions", "transactions", transactions)
 }

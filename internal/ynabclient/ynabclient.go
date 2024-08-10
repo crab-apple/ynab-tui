@@ -6,56 +6,55 @@ import (
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/rickb777/date/v2"
-	"io"
 	"net/http"
 	"ynabtui/internal/ynabclientgen"
 )
 
 type YnabClient struct {
-	clientGen *ynabclientgen.Client
+	clientGen *ynabclientgen.ClientWithResponses
 }
 
 func NewClient(apiUri string, token string) (YnabClient, error) {
 
 	sp, err := securityprovider.NewSecurityProviderBearerToken(token)
-
-	gc, err := ynabclientgen.NewClient(apiUri, ynabclientgen.WithRequestEditorFn(sp.Intercept))
 	if err != nil {
 		return YnabClient{}, err
 	}
 
-	return YnabClient{clientGen: gc}, nil
+	gcr, err := ynabclientgen.NewClientWithResponses(apiUri, ynabclientgen.WithRequestEditorFn(sp.Intercept))
+	if err != nil {
+		return YnabClient{}, err
+	}
+
+	return YnabClient{clientGen: gcr}, nil
 }
 
-func (c YnabClient) ReadBudgets() (string, error) {
-	return c.doGet(func(client *ynabclientgen.Client) (*http.Response, error) {
-		return client.GetBudgets(context.TODO(), nil)
-	})
-}
-func (c YnabClient) ReadTransactions(budgetId string, since date.Date) (string, error) {
-	return c.doGet(func(client *ynabclientgen.Client) (*http.Response, error) {
-		return client.GetTransactions(context.TODO(), budgetId, &ynabclientgen.GetTransactionsParams{
-			SinceDate: &openapi_types.Date{Time: since.Midnight()},
-		})
-	})
-}
+func (c YnabClient) ReadBudgets() ([]ynabclientgen.BudgetSummary, error) {
 
-func (c YnabClient) doGet(query func(client *ynabclientgen.Client) (*http.Response, error)) (string, error) {
-
-	resp, err := query(c.clientGen)
+	res, err := c.clientGen.GetBudgetsWithResponse(context.TODO(), nil)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("expected HTTP 200 but received %d", resp.StatusCode)
+	if res.StatusCode() != http.StatusOK {
+		return nil, fmt.Errorf("expected HTTP 200 but received %d", res.StatusCode())
 	}
 
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	return res.JSON200.Data.Budgets, nil
+}
+
+func (c YnabClient) ReadTransactions(budgetId string, since date.Date) ([]ynabclientgen.TransactionDetail, error) {
+
+	res, err := c.clientGen.GetTransactionsWithResponse(context.TODO(), budgetId, &ynabclientgen.GetTransactionsParams{
+		SinceDate: &openapi_types.Date{Time: since.Midnight()},
+	})
+
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	if res.StatusCode() != http.StatusOK {
+		return nil, fmt.Errorf("expected HTTP 200 but received %d", res.StatusCode())
 	}
 
-	return string(body), nil
+	return res.JSON200.Data.Transactions, nil
 }
