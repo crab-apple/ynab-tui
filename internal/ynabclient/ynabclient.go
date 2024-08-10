@@ -1,69 +1,60 @@
 package ynabclient
 
 import (
+	"context"
 	"fmt"
+	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/rickb777/date/v2"
 	"io"
 	"net/http"
+	"ynabtui/internal/ynabclientgen"
 )
 
 type YnabClient struct {
-	apiUri string
-	token  string
-	client http.Client
+	clientGen *ynabclientgen.Client
 }
 
-func NewClient(apiUri string, token string) YnabClient {
-	return YnabClient{apiUri: apiUri, token: token, client: http.Client{}}
+func NewClient(apiUri string, token string) (YnabClient, error) {
+
+	sp, err := securityprovider.NewSecurityProviderBearerToken(token)
+
+	gc, err := ynabclientgen.NewClient(apiUri, ynabclientgen.WithRequestEditorFn(sp.Intercept))
+	if err != nil {
+		return YnabClient{}, err
+	}
+
+	return YnabClient{clientGen: gc}, nil
 }
 
 func (c YnabClient) ReadBudgets() (string, error) {
-
-	r, err := c.doRequest("/budgets", nil)
-	if err != nil {
-		return "", fmt.Errorf("error while reading budgets,  %w", err)
-	}
-	return r, nil
+	return c.doGet(func(client *ynabclientgen.Client) (*http.Response, error) {
+		return client.GetBudgets(context.TODO(), nil)
+	})
 }
 func (c YnabClient) ReadTransactions(budgetId string, since date.Date) (string, error) {
-
-	r, err := c.doRequest(fmt.Sprintf("/budgets/%s/transactions", budgetId), map[string]string{
-		"since_date": since.String(),
+	return c.doGet(func(client *ynabclientgen.Client) (*http.Response, error) {
+		return client.GetTransactions(context.TODO(), budgetId, &ynabclientgen.GetTransactionsParams{
+			SinceDate: &openapi_types.Date{Time: since.Midnight()},
+		})
 	})
-	if err != nil {
-		return "", fmt.Errorf("error while reading transactions,  %w", err)
-	}
-	return r, nil
 }
 
-func (c YnabClient) doRequest(path string, query map[string]string) (string, error) {
+func (c YnabClient) doGet(query func(client *ynabclientgen.Client) (*http.Response, error)) (string, error) {
 
-	req, err := http.NewRequest("GET", c.apiUri+path, nil)
+	resp, err := query(c.clientGen)
+
 	if err != nil {
 		return "", err
 	}
-
-	if query != nil {
-		q := req.URL.Query()
-		for k, v := range query {
-			q.Add(k, v)
-		}
-		req.URL.RawQuery = q.Encode()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("expected HTTP 200 but received %d", resp.StatusCode)
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return "", err
-	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
-	}
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("status code %d: %s", resp.StatusCode, body)
 	}
 
 	return string(body), nil

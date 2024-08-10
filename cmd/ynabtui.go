@@ -13,7 +13,10 @@ func main() {
 		panic(err)
 	}
 
-	client := ynabclient.NewClient("https://api.ynab.com/v1", token)
+	client, err := ynabclient.NewClient("https://api.ynab.com/v1", token)
+	if err != nil {
+		panic(err)
+	}
 
 	budgetId, err := settings.ReadDefaultBudgetId()
 	if err != nil {
