@@ -1,0 +1,34 @@
+Start writing some end-to-end tests
+Add linter
+
+Display transactions
+Refresh transactions
+Use delta when refreshing transactions, to get only the ones that have changed
+Persist cached data to file, so app doesn't have to load all transactions every time it starts
+Show transtactions as a table
+
+Switch budgets
+
+Easily navigate through transactions
+
+Easily filter transactions
+
+Easily search for transactions
+
+Properly display linked transactions
+
+Properly display split transactions
+
+Some operations with existing transactions. Approve, delete, update memo, update amount.
+
+
+Create a new transaction
+
+
+Beyond transactions
+
+
+Key mapping display (contextual would be better)
+
+API usage display. Remaining calls this hour, and approximate data size in each direction in the past hour.
+
