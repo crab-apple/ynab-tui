@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
-	"path/filepath"
 	"strings"
+	"ynabtui/internal/files"
 )
 
 func ReadAccessToken() (string, error) {
@@ -36,11 +36,10 @@ func ReadDefaultBudgetId() (string, error) {
 }
 
 func readYnabConfigFile(filename string) (string, error) {
-	homedir, err := os.UserHomeDir()
+	f, err := files.GetAppFile(filename)
 	if err != nil {
 		return "", fmt.Errorf("unable to read file: %w", err)
 	}
-	f := filepath.Join(homedir, ".ynab", filename)
 	contents, err := os.ReadFile(f)
 	if err != nil {
 		return "", fmt.Errorf("unable to read file: %w", err)

@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"log/slog"
 )
 
 type Model struct {
@@ -28,6 +29,9 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	slog.Debug("Received message", "type", fmt.Sprintf("%T", msg), "value", msg)
+
 	switch msg := msg.(type) {
 
 	// Is it a key press?

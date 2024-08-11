@@ -6,18 +6,47 @@ import (
 	"github.com/rickb777/date/v2"
 	"log/slog"
 	"os"
+	"ynabtui/internal/files"
 	"ynabtui/internal/model"
 	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabclient"
 )
 
 func main() {
+
+	defer setUpLogging()()
+
 	p := tea.NewProgram(model.InitialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
 }
+
+func setUpLogging() func() {
+
+	logLevel := slog.LevelWarn
+	_, d := os.LookupEnv("YNAB_TUI_DEBUG")
+	if d {
+		logLevel = slog.LevelDebug
+	}
+
+	filePath, err := files.GetAppFile("log")
+	if err != nil {
+		panic(err)
+	}
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(f, &slog.HandlerOptions{Level: logLevel})))
+
+	return func() {
+		f.Close()
+	}
+}
+
 func fetchDataFromYnabExample() {
 
 	token, err := settings.ReadAccessToken()
