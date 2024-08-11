@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	openapitypes "github.com/oapi-codegen/runtime/types"
 	"github.com/rickb777/date/v2"
 	"net/http"
 	"ynabtui/internal/ynabclientgen"
@@ -46,7 +46,7 @@ func (c YnabClient) ReadBudgets() ([]ynabclientgen.BudgetSummary, error) {
 func (c YnabClient) ReadTransactions(budgetId string, since date.Date) ([]ynabclientgen.TransactionDetail, error) {
 
 	res, err := c.clientGen.GetTransactionsWithResponse(context.TODO(), budgetId, &ynabclientgen.GetTransactionsParams{
-		SinceDate: &openapi_types.Date{Time: since.Midnight()},
+		SinceDate: &openapitypes.Date{Time: since.Midnight()},
 	})
 
 	if err != nil {
