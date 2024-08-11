@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rickb777/date/v2"
+	"io"
 	"log/slog"
 	"os"
 	"ynabtui/internal/files"
@@ -13,10 +14,14 @@ import (
 )
 
 func main() {
+	runApp(os.Stdin, os.Stdout)
+}
+
+func runApp(input io.Reader, output io.Writer) {
 
 	defer setUpLogging()()
 
-	p := tea.NewProgram(model.InitialModel())
+	p := tea.NewProgram(model.InitialModel(), tea.WithInput(input), tea.WithOutput(output))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
