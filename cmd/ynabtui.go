@@ -33,18 +33,12 @@ func setUpLogging() func() {
 		logLevel = slog.LevelDebug
 	}
 
-	filePath, err := files.GetAppFile("log")
-	if err != nil {
-		panic(err)
-	}
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	logWriter, cleanup, err := files.GetLogWriter()
 	if err != nil {
 		panic(err)
 	}
 
-	slog.SetDefault(slog.New(slog.NewTextHandler(f, &slog.HandlerOptions{Level: logLevel})))
+	slog.SetDefault(slog.New(slog.NewTextHandler(logWriter, &slog.HandlerOptions{Level: logLevel})))
 
-	return func() {
-		f.Close()
-	}
+	return cleanup
 }
