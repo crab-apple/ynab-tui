@@ -10,14 +10,14 @@ import (
 
 func TestQQuitsProgram(t *testing.T) {
 
-	output := bytes.NewBuffer(make([]byte, 0))
-	input := bytes.NewBuffer(make([]byte, 0))
+	output := bytes.Buffer{}
+	input := bytes.Buffer{}
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
-		runApp(input, output)
+		runApp(&input, &output)
 		wg.Done()
 	}()
 
