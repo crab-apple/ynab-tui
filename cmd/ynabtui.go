@@ -3,14 +3,11 @@ package main
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rickb777/date/v2"
 	"io"
 	"log/slog"
 	"os"
 	"ynabtui/internal/files"
 	"ynabtui/internal/model"
-	"ynabtui/internal/settings"
-	"ynabtui/internal/ynabclient"
 )
 
 func main() {
@@ -50,40 +47,4 @@ func setUpLogging() func() {
 	return func() {
 		f.Close()
 	}
-}
-
-func fetchDataFromYnabExample() {
-
-	token, err := settings.ReadAccessToken()
-	if err != nil {
-		panic(err)
-	}
-
-	client, err := ynabclient.NewClient("https://api.ynab.com/v1", token)
-	if err != nil {
-		panic(err)
-	}
-
-	budgetId, err := settings.ReadDefaultBudgetId()
-	if err != nil {
-		panic(err)
-	}
-
-	budgets, err := client.ReadBudgets()
-	if err != nil {
-		panic(err)
-	}
-	slog.Info("Fetched budgets", "budgets", budgets)
-
-	// Only get transactions form the past couple days
-	sinceDate := date.TodayUTC().AddDate(0, 0, -2)
-	if err != nil {
-		panic(err)
-	}
-
-	transactions, err := client.ReadTransactions(budgetId, sinceDate)
-	if err != nil {
-		panic(err)
-	}
-	slog.Info("Fetched transactions", "transactions", transactions)
 }
