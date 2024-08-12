@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	runApp(os.Stdin, os.Stdout)
+	runApp(os.Stdin, os.Stdout, files.AppFilesImpl{})
 }
 
-func runApp(input io.Reader, output io.Writer) {
+func runApp(input io.Reader, output io.Writer, appFiles files.AppFiles) {
 
-	defer setUpLogging()()
+	defer setUpLogging(appFiles)()
 
 	p := tea.NewProgram(model.InitialModel(), tea.WithInput(input), tea.WithOutput(output))
 	if _, err := p.Run(); err != nil {
@@ -25,7 +25,7 @@ func runApp(input io.Reader, output io.Writer) {
 	}
 }
 
-func setUpLogging() func() {
+func setUpLogging(appFiles files.AppFiles) func() {
 
 	logLevel := slog.LevelWarn
 	_, d := os.LookupEnv("YNAB_TUI_DEBUG")
@@ -33,7 +33,7 @@ func setUpLogging() func() {
 		logLevel = slog.LevelDebug
 	}
 
-	logWriter, cleanup, err := files.GetLogWriter()
+	logWriter, cleanup, err := appFiles.GetLogWriter()
 	if err != nil {
 		panic(err)
 	}

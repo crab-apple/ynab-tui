@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/stretchr/testify/require"
+	"io"
 	"sync"
 	"testing"
 	"time"
@@ -17,13 +18,20 @@ func TestQQuitsProgram(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		runApp(&input, &output)
+		runApp(&input, &output, AppFilesFake{})
 		wg.Done()
 	}()
 
 	input.WriteRune('q')
 
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
+}
+
+type AppFilesFake struct {
+}
+
+func (AppFilesFake) GetLogWriter() (io.Writer, func(), error) {
+	return io.Discard, func() {}, nil
 }
 
 // waitTimeout waits for the waitgroup for the specified max timeout.

@@ -6,7 +6,14 @@ import (
 	"path/filepath"
 )
 
-func GetLogWriter() (io.Writer, func(), error) {
+type AppFiles interface {
+	GetLogWriter() (io.Writer, func(), error)
+}
+
+type AppFilesImpl struct {
+}
+
+func (AppFilesImpl) GetLogWriter() (io.Writer, func(), error) {
 	filePath, err := GetAppFile("log")
 	if err != nil {
 		return nil, nil, err
