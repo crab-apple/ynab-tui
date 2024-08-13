@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"github.com/stretchr/testify/require"
 	"io"
 	"sync"
@@ -11,18 +10,20 @@ import (
 
 func TestQQuitsProgram(t *testing.T) {
 
-	output := bytes.Buffer{}
-	input := bytes.Buffer{}
+	output := io.Discard
+
+	inputReader, inputWriter := io.Pipe()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
-		runApp(&input, &output, AppFilesFake{})
+		runApp(inputReader, output, AppFilesFake{})
 		wg.Done()
 	}()
 
-	input.WriteRune('q')
+	_, err := inputWriter.Write([]byte("q"))
+	require.NoError(t, err)
 
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
 }
