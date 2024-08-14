@@ -28,6 +28,64 @@ func TestQQuitsProgram(t *testing.T) {
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
 }
 
+func TestDisplaysGroceries(t *testing.T) {
+
+	outputReader, outputWriter := io.Pipe()
+	inputReader, inputWriter := io.Pipe()
+	errs := make(chan error, 8)
+
+	wg := sync.WaitGroup{}
+
+	// Run the program
+	wg.Add(1)
+	go func() {
+		runApp(inputReader, outputWriter, AppFilesFake{})
+		if err := outputWriter.Close(); err != nil {
+			errs <- err
+		}
+		wg.Done()
+	}()
+
+	// Read the program output
+	output := make([]byte, 0)
+	wg.Add(1)
+	go func() {
+		for {
+			b := make([]byte, 8)
+			n, err := outputReader.Read(b)
+			output = append(output, b[:n]...)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				errs <- err
+				break
+			}
+		}
+		wg.Done()
+	}()
+
+	var err error
+
+	_, err = inputWriter.Write([]byte("q"))
+	require.NoError(t, err)
+
+	// Wait for the program to finish
+	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
+
+	// Check for errors
+	select {
+	case err = <-errs:
+		t.Error(err)
+	default:
+	}
+
+	// Assert output
+	require.Contains(t, string(output), "Buy carrots")
+	require.Contains(t, string(output), "Buy celery")
+	require.Contains(t, string(output), "Buy kohlrabi")
+}
+
 type AppFilesFake struct {
 }
 
