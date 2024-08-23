@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"ynabtui/test"
 )
 
 func TestQQuitsProgram(t *testing.T) {
@@ -81,9 +82,19 @@ func TestDisplaysGroceries(t *testing.T) {
 	}
 
 	// Assert output
-	require.Contains(t, string(output), "Buy carrots")
-	require.Contains(t, string(output), "Buy celery")
-	require.Contains(t, string(output), "Buy kohlrabi")
+	visible, err := test.ParseTerminalOutput(output)
+	require.NoError(t, err)
+
+	expected := `What should we buy at the market?
+
+> [ ] Buy carrots
+  [ ] Buy celery
+  [ ] Buy kohlrabi
+
+Press q to quit.
+`
+
+	require.Equal(t, expected, visible)
 }
 
 type AppFilesFake struct {
