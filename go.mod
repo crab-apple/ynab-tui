@@ -1,6 +1,6 @@
 module ynabtui
 
-go 1.21
+go 1.22.0
 
 require (
 	github.com/charmbracelet/bubbletea v0.26.6
