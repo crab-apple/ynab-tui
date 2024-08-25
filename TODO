@@ -1,8 +1,3 @@
-Start writing some end-to-end tests
-  Consume the output with a terminal emulator so we can do more exact assertions on the result displayed at the end
-Set up CI on Github
-Add linter
-
 Display transactions
 Refresh transactions
 Use delta when refreshing transactions, to get only the ones that have changed
