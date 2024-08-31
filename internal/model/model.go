@@ -4,18 +4,24 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"log/slog"
+	"ynabtui/internal/model/ynab"
+	"ynabtui/test"
 )
 
 type Model struct {
-	choices  []string
-	cursor   int
-	selected map[int]struct{}
+	transactions []ynab.Transaction
+	cursor       int
+	selected     map[int]struct{}
 }
 
 func InitialModel() Model {
+
 	return Model{
-		// Our to-do list is a grocery list
-		choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+		transactions: []ynab.Transaction{
+			test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
+			test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
+			test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
+		},
 
 		// A map which indicates which choices are selected. We're using
 		// the  map like a mathematical set. The keys refer to the indexes
@@ -52,7 +58,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "down" and "j" keys move the cursor down
 		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
+			if m.cursor < len(m.transactions)-1 {
 				m.cursor++
 			}
 
@@ -74,10 +80,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 func (m Model) View() string {
 	// The header
-	s := "What should we buy at the market?\n\n"
+	s := "Recent transactions:\n\n"
 
 	// Iterate over our choices
-	for i, choice := range m.choices {
+	for i, transaction := range m.transactions {
 
 		// Is the cursor pointing at this choice?
 		cursor := " " // no cursor
@@ -92,7 +98,7 @@ func (m Model) View() string {
 		}
 
 		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, renderTransaction(transaction))
 	}
 
 	// The footer
@@ -100,4 +106,8 @@ func (m Model) View() string {
 
 	// Send the UI for rendering
 	return s
+}
+
+func renderTransaction(t ynab.Transaction) string {
+	return fmt.Sprintf("%-15s%-20s%-10s%10d  %-20s", t.Date.Format("2006-01-02"), t.AccountName, *t.CategoryName, t.Amount, t.Memo)
 }

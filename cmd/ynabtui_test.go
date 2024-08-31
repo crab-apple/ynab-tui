@@ -29,7 +29,7 @@ func TestQQuitsProgram(t *testing.T) {
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
 }
 
-func TestDisplaysGroceries(t *testing.T) {
+func TestDisplaysTransactions(t *testing.T) {
 
 	outputReader, outputWriter := io.Pipe()
 	inputReader, inputWriter := io.Pipe()
@@ -85,16 +85,9 @@ func TestDisplaysGroceries(t *testing.T) {
 	visible, err := test.ParseTerminalOutput(output)
 	require.NoError(t, err)
 
-	expected := `What should we buy at the market?
+	require.Contains(t, visible, "Last minute groceries")
+	require.Contains(t, visible, "Chewing gum")
 
-> [ ] Buy carrots
-  [ ] Buy celery
-  [ ] Buy kohlrabi
-
-Press q to quit.
-`
-
-	require.Equal(t, expected, visible)
 }
 
 type AppFilesFake struct {
