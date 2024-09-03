@@ -12,6 +12,6 @@ type Transaction struct {
 	AccountName  string
 	CategoryId   *uuid.UUID
 	CategoryName *string
-	Amount       uint32
+	Amount       Money
 	Memo         string
 }

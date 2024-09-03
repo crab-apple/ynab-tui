@@ -30,9 +30,14 @@ var (
 	}
 )
 
-func MakeTransaction(account *ynab.Account, category *ynab.Category, date string, amount uint32, memo string) ynab.Transaction {
+func MakeTransaction(account *ynab.Account, category *ynab.Category, date string, amount int64, memo string) ynab.Transaction {
 
 	t, err := time.Parse(time.RFC3339, fmt.Sprintf("%sT00:00:00Z", date))
+	if err != nil {
+		panic(err)
+	}
+
+	amountMoney, err := ynab.NewMoney(amount)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +49,7 @@ func MakeTransaction(account *ynab.Account, category *ynab.Category, date string
 		AccountName:  account.Name,
 		CategoryId:   &category.Id,
 		CategoryName: &category.Name,
-		Amount:       amount,
+		Amount:       amountMoney,
 		Memo:         memo,
 	}
 }

@@ -109,5 +109,5 @@ func (m Model) View() string {
 }
 
 func renderTransaction(t ynab.Transaction) string {
-	return fmt.Sprintf("%-15s%-20s%-10s%10d  %-20s", t.Date.Format("2006-01-02"), t.AccountName, *t.CategoryName, t.Amount, t.Memo)
+	return fmt.Sprintf("%-15s%-20s%-10s%10s  %-20s", t.Date.Format("2006-01-02"), t.AccountName, *t.CategoryName, t.Amount.Format(), t.Memo)
 }
