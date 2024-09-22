@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"math/rand"
-	"time"
 	"ynabtui/internal/model/ynab"
+	"ynabtui/internal/model/ynab/date"
 )
 
 var (
@@ -30,9 +30,9 @@ var (
 	}
 )
 
-func MakeTransaction(account *ynab.Account, category *ynab.Category, date string, amount int64, memo string) ynab.Transaction {
+func MakeTransaction(account *ynab.Account, category *ynab.Category, dateStr string, amount int64, memo string) ynab.Transaction {
 
-	t, err := time.Parse(time.RFC3339, fmt.Sprintf("%sT00:00:00Z", date))
+	d, err := date.Parse(dateStr)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func MakeTransaction(account *ynab.Account, category *ynab.Category, date string
 
 	return ynab.Transaction{
 		Id:           fmt.Sprintf("%d", rand.Uint32()),
-		Date:         t,
+		Date:         d,
 		AccountId:    account.Id,
 		AccountName:  account.Name,
 		CategoryId:   &category.Id,

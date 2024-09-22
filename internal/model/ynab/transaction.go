@@ -2,12 +2,12 @@ package ynab
 
 import (
 	"github.com/google/uuid"
-	"time"
+	"ynabtui/internal/model/ynab/date"
 )
 
 type Transaction struct {
 	Id           string
-	Date         time.Time
+	Date         date.Date
 	AccountId    uuid.UUID
 	AccountName  string
 	CategoryId   *uuid.UUID
