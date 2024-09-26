@@ -14,14 +14,26 @@ type Model struct {
 	selected     map[int]struct{}
 }
 
+var fakeTransactions = []ynab.Transaction{
+	test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
+	test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
+	test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
+}
+
+type readTransactionsMsg struct {
+	transactions []ynab.Transaction
+}
+
+func readTransactions() tea.Msg {
+	return readTransactionsMsg{
+		transactions: fakeTransactions,
+	}
+}
+
 func InitialModel() Model {
 
 	return Model{
-		transactions: []ynab.Transaction{
-			test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
-			test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
-			test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
-		},
+		transactions: nil,
 
 		// A map which indicates which choices are selected. We're using
 		// the  map like a mathematical set. The keys refer to the indexes
@@ -32,13 +44,16 @@ func InitialModel() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return readTransactions
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	slog.Debug("Received message", "type", fmt.Sprintf("%T", msg), "value", msg)
 
 	switch msg := msg.(type) {
+
+	case readTransactionsMsg:
+		m.transactions = msg.transactions
 
 	// Is it a key press?
 	case tea.KeyMsg:
