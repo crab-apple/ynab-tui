@@ -4,38 +4,29 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"log/slog"
+	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/internal/ynabmodel/date"
-	"ynabtui/test"
 )
 
 type Model struct {
+	// TODO I'm not sure that it makes sense to have dependencies in the model. Should revisit this later.
+	api ynabapi.YnabApi
+
 	transactions []ynabmodel.Transaction
 	cursor       int
 	selected     map[int]struct{}
 }
 
-var api = test.NewFakeYnab().Api()
-
 type readTransactionsMsg struct {
 	transactions []ynabmodel.Transaction
 }
 
-func readTransactions() tea.Msg {
-
-	since, _ := date.Parse("2020-01-01")
-
-	// TODO handle error
-	transactions, _ := api.ReadTransactions("the-budget", since)
-
-	return readTransactionsMsg{
-		transactions: transactions,
-	}
-}
-
-func InitialModel() Model {
+func InitialModel(api ynabapi.YnabApi) Model {
 
 	return Model{
+		api: api,
+
 		transactions: nil,
 
 		// A map which indicates which choices are selected. We're using
@@ -46,8 +37,19 @@ func InitialModel() Model {
 
 }
 
+func (m Model) readTransactions() tea.Msg {
+	since, _ := date.Parse("2020-01-01")
+
+	// TODO handle error
+	transactions, _ := m.api.ReadTransactions("the-budget", since)
+
+	return readTransactionsMsg{
+		transactions: transactions,
+	}
+}
+
 func (m Model) Init() tea.Cmd {
-	return readTransactions
+	return m.readTransactions
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 

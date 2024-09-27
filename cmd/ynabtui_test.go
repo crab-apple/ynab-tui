@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"ynabtui/internal/ynabmodel"
 	"ynabtui/test"
 )
 
@@ -19,7 +20,7 @@ func TestQQuitsProgram(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		runApp(inputReader, output, AppFilesFake{})
+		runApp(inputReader, output, test.NewFakeYnab().Api(), AppFilesFake{})
 		wg.Done()
 	}()
 
@@ -31,6 +32,14 @@ func TestQQuitsProgram(t *testing.T) {
 
 func TestDisplaysTransactions(t *testing.T) {
 
+	ynab := test.NewFakeYnab()
+
+	ynab.SetTransactions([]ynabmodel.Transaction{
+		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
+		test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
+		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
+	})
+
 	outputReader, outputWriter := io.Pipe()
 	inputReader, inputWriter := io.Pipe()
 	errs := make(chan error, 8)
@@ -40,7 +49,7 @@ func TestDisplaysTransactions(t *testing.T) {
 	// Run the program
 	wg.Add(1)
 	go func() {
-		runApp(inputReader, outputWriter, AppFilesFake{})
+		runApp(inputReader, outputWriter, ynab.Api(), AppFilesFake{})
 		if err := outputWriter.Close(); err != nil {
 			errs <- err
 		}

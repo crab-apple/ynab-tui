@@ -11,13 +11,11 @@ type FakeYnab struct {
 }
 
 func NewFakeYnab() *FakeYnab {
-	return &FakeYnab{
-		transactions: []ynabmodel.Transaction{
-			MakeTransaction(&AccChecking, &CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
-			MakeTransaction(&AccCash, &CatGroceries, "2020-01-02", 3500, "Chewing gum"),
-			MakeTransaction(&AccChecking, &CatRent, "2020-01-02", 1000000, ""),
-		},
-	}
+	return &FakeYnab{}
+}
+
+func (fy *FakeYnab) SetTransactions(transactions []ynabmodel.Transaction) {
+	fy.transactions = transactions
 }
 
 func (fy *FakeYnab) Api() ynabapi.YnabApi {
