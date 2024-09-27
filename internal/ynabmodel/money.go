@@ -1,4 +1,4 @@
-package ynab
+package ynabmodel
 
 import (
 	"errors"

@@ -4,45 +4,45 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"math/rand"
-	"ynabtui/internal/model/ynab"
-	"ynabtui/internal/model/ynab/date"
+	"ynabtui/internal/ynabmodel"
+	"ynabtui/internal/ynabmodel/date"
 )
 
 var (
-	AccCash = ynab.Account{
+	AccCash = ynabmodel.Account{
 		Id:   uuid.UUID{},
 		Name: "Cash",
 	}
-	AccChecking = ynab.Account{
+	AccChecking = ynabmodel.Account{
 		Id:   uuid.UUID{},
 		Name: "Checking account",
 	}
 )
 
 var (
-	CatGroceries = ynab.Category{
+	CatGroceries = ynabmodel.Category{
 		Id:   uuid.UUID{},
 		Name: "Groceries",
 	}
-	CatRent = ynab.Category{
+	CatRent = ynabmodel.Category{
 		Id:   uuid.UUID{},
 		Name: "Rent",
 	}
 )
 
-func MakeTransaction(account *ynab.Account, category *ynab.Category, dateStr string, amount int64, memo string) ynab.Transaction {
+func MakeTransaction(account *ynabmodel.Account, category *ynabmodel.Category, dateStr string, amount int64, memo string) ynabmodel.Transaction {
 
 	d, err := date.Parse(dateStr)
 	if err != nil {
 		panic(err)
 	}
 
-	amountMoney, err := ynab.NewMoney(amount)
+	amountMoney, err := ynabmodel.NewMoney(amount)
 	if err != nil {
 		panic(err)
 	}
 
-	return ynab.Transaction{
+	return ynabmodel.Transaction{
 		Id:           fmt.Sprintf("%d", rand.Uint32()),
 		Date:         d,
 		AccountId:    account.Id,

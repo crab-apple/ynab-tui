@@ -1,4 +1,4 @@
-package ynab
+package ynabmodel
 
 import (
 	"github.com/stretchr/testify/require"

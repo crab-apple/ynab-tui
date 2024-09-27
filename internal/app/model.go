@@ -1,27 +1,27 @@
-package model
+package app
 
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"log/slog"
-	"ynabtui/internal/model/ynab"
+	"ynabtui/internal/ynabmodel"
 	"ynabtui/test"
 )
 
 type Model struct {
-	transactions []ynab.Transaction
+	transactions []ynabmodel.Transaction
 	cursor       int
 	selected     map[int]struct{}
 }
 
-var fakeTransactions = []ynab.Transaction{
+var fakeTransactions = []ynabmodel.Transaction{
 	test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
 	test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
 	test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
 }
 
 type readTransactionsMsg struct {
-	transactions []ynab.Transaction
+	transactions []ynabmodel.Transaction
 }
 
 func readTransactions() tea.Msg {
@@ -123,6 +123,6 @@ func (m Model) View() string {
 	return s
 }
 
-func renderTransaction(t ynab.Transaction) string {
+func renderTransaction(t ynabmodel.Transaction) string {
 	return fmt.Sprintf("%-15s%-20s%-10s%10s  %-20s", t.Date.String(), t.AccountName, *t.CategoryName, t.Amount.Format(), t.Memo)
 }
