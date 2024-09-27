@@ -5,6 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"log/slog"
 	"ynabtui/internal/ynabmodel"
+	"ynabtui/internal/ynabmodel/date"
 	"ynabtui/test"
 )
 
@@ -14,19 +15,21 @@ type Model struct {
 	selected     map[int]struct{}
 }
 
-var fakeTransactions = []ynabmodel.Transaction{
-	test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
-	test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
-	test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
-}
+var api = test.NewFakeYnab().Api()
 
 type readTransactionsMsg struct {
 	transactions []ynabmodel.Transaction
 }
 
 func readTransactions() tea.Msg {
+
+	since, _ := date.Parse("2020-01-01")
+
+	// TODO handle error
+	transactions, _ := api.ReadTransactions("the-budget", since)
+
 	return readTransactionsMsg{
-		transactions: fakeTransactions,
+		transactions: transactions,
 	}
 }
 

@@ -1,4 +1,4 @@
-package ynabclient
+package ynabapi
 
 import (
 	"context"
