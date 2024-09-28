@@ -8,22 +8,23 @@ import (
 	"os"
 	"ynabtui/internal/app"
 	"ynabtui/internal/files"
+	"ynabtui/internal/settings"
 	"ynabtui/internal/ynabapi"
-	"ynabtui/internal/ynabmodel"
-	"ynabtui/test"
 )
 
 func main() {
 
-	ynab := test.NewFakeYnab()
+	accessToken, err := settings.ReadAccessToken()
+	if err != nil {
+		panic(err)
+	}
 
-	ynab.SetTransactions([]ynabmodel.Transaction{
-		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
-		test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
-		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
-	})
+	api, err := ynabapi.NewClient("https://api.ynab.com/v1", accessToken)
+	if err != nil {
+		panic(err)
+	}
 
-	runApp(os.Stdin, os.Stdout, ynab.Api(), files.AppFilesImpl{})
+	runApp(os.Stdin, os.Stdout, api, files.AppFilesImpl{})
 }
 
 func runApp(input io.Reader, output io.Writer, api ynabapi.YnabApi, appFiles files.AppFiles) {
