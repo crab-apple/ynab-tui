@@ -3,6 +3,7 @@ package date
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 )
 
@@ -12,6 +13,10 @@ type Date struct {
 
 func (d Date) String() string {
 	return d.time.String()[0:10]
+}
+
+func (d Date) Midnight() time.Time {
+	return d.time
 }
 
 func (d Date) MinusDays(days int) (Date, error) {
@@ -41,4 +46,13 @@ func Parse(s string) (Date, error) {
 		return Date{}, err
 	}
 	return FromTime(t)
+}
+
+func Today() Date {
+	d, err := Parse(time.Now().Format("2006-01-02"))
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+	return d
 }

@@ -74,6 +74,16 @@ func TestInvalidStrings(t *testing.T) {
 
 }
 
+func TestToday(t *testing.T) {
+	d := Today()
+	require.Equal(t, time.Now().Format("2006-01-02"), d.String())
+}
+
+func TestMidnight(t *testing.T) {
+	d := makeDate("2023-04-05")
+	require.Equal(t, makeTime("2023-04-05T00:00:00Z"), d.Midnight())
+}
+
 func TestMinusDays(t *testing.T) {
 
 	t.Run("Subtraction works", func(t *testing.T) {
