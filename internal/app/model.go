@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/samber/lo"
 	"log/slog"
 	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
@@ -38,10 +39,23 @@ func InitialModel(api ynabapi.YnabApi) Model {
 }
 
 func (m Model) readTransactions() tea.Msg {
-	since, _ := date.Parse("2020-01-01")
+	since, _ := date.Today().MinusDays(7)
 
-	// TODO handle error
-	transactions, _ := m.api.ReadTransactions("the-budget", since)
+	budgets, err := m.api.ReadBudgets()
+	if err != nil {
+		// TODO handle
+		panic(err)
+	}
+
+	budget := lo.MaxBy(budgets, func(a ynabmodel.Budget, b ynabmodel.Budget) bool {
+		return a.LastModifiedOn.After(b.LastModifiedOn)
+	})
+
+	transactions, err := m.api.ReadTransactions(budget.Id, since)
+	if err != nil {
+		// TODO handle
+		panic(err)
+	}
 
 	return readTransactionsMsg{
 		transactions: transactions,

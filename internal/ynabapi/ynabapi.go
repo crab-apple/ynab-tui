@@ -6,5 +6,6 @@ import (
 )
 
 type YnabApi interface {
+	ReadBudgets() ([]ynabmodel.Budget, error)
 	ReadTransactions(budgetId string, since date.Date) ([]ynabmodel.Transaction, error)
 }
