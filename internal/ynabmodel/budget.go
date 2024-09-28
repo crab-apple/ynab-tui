@@ -1,10 +1,11 @@
 package ynabmodel
 
 import (
+	"github.com/google/uuid"
 	"time"
 )
 
 type Budget struct {
-	Id             string
+	Id             uuid.UUID
 	LastModifiedOn time.Time
 }
