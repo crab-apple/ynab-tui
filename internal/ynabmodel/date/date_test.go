@@ -1,6 +1,7 @@
 package date
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"log"
 	"testing"
@@ -73,6 +74,62 @@ func TestInvalidStrings(t *testing.T) {
 
 }
 
+func TestMinusDays(t *testing.T) {
+
+	t.Run("Subtraction works", func(t *testing.T) {
+
+		type testCase struct {
+			initial        Date
+			daysSubtracted int
+			expectedResult Date
+		}
+
+		describe := func(tc testCase) string {
+			return fmt.Sprintf("%s minus %d days is %s", tc.initial.String(), tc.daysSubtracted, tc.expectedResult.String())
+		}
+
+		cases := []struct {
+			initial        Date
+			daysSubtracted int
+			expectedResult Date
+		}{
+			{
+				initial:        makeDate("2023-01-01"),
+				daysSubtracted: 0,
+				expectedResult: makeDate("2023-01-01"),
+			},
+			{
+				initial:        makeDate("2023-01-30"),
+				daysSubtracted: 1,
+				expectedResult: makeDate("2023-01-29"),
+			},
+			{
+				initial:        makeDate("2023-01-30"),
+				daysSubtracted: 365,
+				expectedResult: makeDate("2022-01-30"),
+			},
+			{
+				initial:        makeDate("2025-01-30"),
+				daysSubtracted: 365,
+				expectedResult: makeDate("2024-01-31"),
+			},
+		}
+
+		for _, c := range cases {
+			t.Run(describe(c), func(t *testing.T) {
+				d, err := c.initial.MinusDays(c.daysSubtracted)
+				require.NoError(t, err)
+				require.Equal(t, c.expectedResult, d)
+			})
+		}
+	})
+
+	t.Run("Negative input not allowed", func(t *testing.T) {
+		_, err := makeDate("2020-01-01").MinusDays(-1)
+		require.Error(t, err)
+	})
+}
+
 func TestString(t *testing.T) {
 	date, _ := FromTime(makeTime("2024-01-02T00:00:00Z"))
 	require.Equal(t, "2024-01-02", date.String())
@@ -87,4 +144,12 @@ func makeTime(s string) time.Time {
 		log.Fatal(err)
 	}
 	return t
+}
+
+func makeDate(s string) Date {
+	d, err := Parse(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return d
 }
