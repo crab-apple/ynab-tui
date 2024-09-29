@@ -39,10 +39,10 @@ type TestTerminal struct {
 	errs         chan error
 }
 
-func NewTestTerminal() TestTerminal {
+func NewTestTerminal() *TestTerminal {
 	or, ow := io.Pipe()
 	ir, iw := io.Pipe()
-	return TestTerminal{
+	return &TestTerminal{
 		outputReader: or,
 		outputWriter: ow,
 		inputReader:  ir,
@@ -50,6 +50,25 @@ func NewTestTerminal() TestTerminal {
 		output:       make([]byte, 8),
 		errs:         make(chan error),
 	}
+}
+
+func (term *TestTerminal) ProcessOutput() {
+	for {
+		b := make([]byte, 8)
+		n, err := term.outputReader.Read(b)
+		term.output = append(term.output, b[:n]...)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			term.errs <- err
+			break
+		}
+	}
+}
+
+func (term *TestTerminal) GetOutput() (string, error) {
+	return test.ParseTerminalOutput(term.output)
 }
 
 func TestDisplaysTransactions(t *testing.T) {
@@ -78,18 +97,7 @@ func TestDisplaysTransactions(t *testing.T) {
 	// Read the program output
 	wg.Add(1)
 	go func() {
-		for {
-			b := make([]byte, 8)
-			n, err := term.outputReader.Read(b)
-			term.output = append(term.output, b[:n]...)
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				term.errs <- err
-				break
-			}
-		}
+		term.ProcessOutput()
 		wg.Done()
 	}()
 
@@ -109,7 +117,7 @@ func TestDisplaysTransactions(t *testing.T) {
 	}
 
 	// Assert output
-	visible, err := test.ParseTerminalOutput(term.output)
+	visible, err := term.GetOutput()
 	require.NoError(t, err)
 
 	require.Contains(t, visible, "Last minute groceries")
