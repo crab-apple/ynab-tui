@@ -2,6 +2,7 @@ package test
 
 import (
 	"github.com/google/uuid"
+	"time"
 	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/internal/ynabmodel/date"
@@ -36,5 +37,6 @@ func (api fakeYnabApi) ReadBudgets() ([]ynabmodel.Budget, error) {
 }
 
 func (api fakeYnabApi) ReadTransactions(budgetId uuid.UUID, since date.Date) ([]ynabmodel.Transaction, error) {
+	time.Sleep(10 * time.Millisecond)
 	return api.fy.transactions, nil
 }

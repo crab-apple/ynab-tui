@@ -46,7 +46,21 @@ func (env TestEnv) Run() {
 	}()
 }
 
-func (env TestEnv) GetOutput() string {
+func (env TestEnv) WaitUntil(condition func(output string) bool, timeout time.Duration) string {
+	start := time.Now()
+	for time.Since(start) < timeout {
+		output, err := env.tterm.GetOutput()
+		require.NoError(env.t, err)
+		if condition(output) {
+			return output
+		}
+		time.Sleep(1 * time.Millisecond)
+	}
+	env.t.Error("Did not reach expected state in time")
+	return ""
+}
+
+func (env TestEnv) WaitFinish() {
 
 	// Wait for the program to finish
 	require.False(env.t, waitTimeout(env.wg, 100*time.Millisecond))
@@ -57,11 +71,6 @@ func (env TestEnv) GetOutput() string {
 		env.t.Error(err)
 	default:
 	}
-
-	visible, err := env.tterm.GetOutput()
-	require.NoError(env.t, err)
-
-	return visible
 }
 
 func (env TestEnv) Type(r rune) {

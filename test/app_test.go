@@ -2,7 +2,9 @@ package test
 
 import (
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
+	"time"
 	"ynabtui/internal/ynabmodel"
 )
 
@@ -14,7 +16,7 @@ func TestQQuitsProgram(t *testing.T) {
 
 	env.Type('q')
 
-	env.GetOutput()
+	env.WaitFinish()
 }
 
 func TestDisplaysTransactions(t *testing.T) {
@@ -29,10 +31,14 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	env.Run()
 
+	output := env.WaitUntil(func(output string) bool {
+		return strings.Contains(output, "gum")
+	}, 1*time.Second)
+
+	require.Contains(t, output, "Last minute groceries")
+	require.Contains(t, output, "Chewing gum")
+
 	env.Type('q')
 
-	visible := env.GetOutput()
-
-	require.Contains(t, visible, "Last minute groceries")
-	require.Contains(t, visible, "Chewing gum")
+	env.WaitFinish()
 }
