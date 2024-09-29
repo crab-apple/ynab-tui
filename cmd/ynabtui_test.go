@@ -74,7 +74,7 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	var err error
 
-	_, err = env.tterm.InputWriter.Write([]byte("q"))
+	err = env.tterm.Type('q')
 	require.NoError(t, err)
 
 	// Wait for the program to finish

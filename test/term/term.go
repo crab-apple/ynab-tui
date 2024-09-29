@@ -54,6 +54,11 @@ func (term *TestTerminal) CleanUp() {
 	}
 }
 
+func (term *TestTerminal) Type(r rune) error {
+	_, err := term.InputWriter.Write([]byte{byte(r)})
+	return err
+}
+
 func parseTerminalOutput(output []byte) (string, error) {
 
 	result := make([]byte, 0)
