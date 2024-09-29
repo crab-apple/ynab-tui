@@ -6,69 +6,10 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"ynabtui/internal/app"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/test"
-	"ynabtui/test/term"
 )
-
-type TestEnv struct {
-	t     *testing.T
-	ynab  *test.FakeYnab
-	files AppFilesFake
-	tterm *term.TestTerminal
-	wg    *sync.WaitGroup
-}
-
-func NewTestEnv(t *testing.T) TestEnv {
-	return TestEnv{
-		t:     t,
-		ynab:  test.NewFakeYnab(),
-		files: AppFilesFake{},
-		tterm: term.NewTestTerminal(),
-		wg:    &sync.WaitGroup{},
-	}
-}
-
-func (env TestEnv) Run() {
-
-	// Run the program
-	env.wg.Add(1)
-	go func() {
-		runApp(env.tterm.InputReader, env.tterm.OutputWriter, env.ynab.Api(), env.files)
-		env.tterm.CleanUp()
-		env.wg.Done()
-	}()
-
-	// Read the program output
-	env.wg.Add(1)
-	go func() {
-		env.tterm.ProcessOutput()
-		env.wg.Done()
-	}()
-}
-
-func (env TestEnv) GetOutput() string {
-
-	// Wait for the program to finish
-	require.False(env.t, waitTimeout(env.wg, 100*time.Millisecond))
-
-	// Check for errors
-	select {
-	case err := <-env.tterm.Errs:
-		env.t.Error(err)
-	default:
-	}
-
-	visible, err := env.tterm.GetOutput()
-	require.NoError(env.t, err)
-
-	return visible
-}
-
-func (env TestEnv) Type(r rune) {
-	err := env.tterm.Type(r)
-	require.NoError(env.t, err)
-}
 
 func TestQQuitsProgram(t *testing.T) {
 
@@ -80,7 +21,7 @@ func TestQQuitsProgram(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		runApp(inputReader, output, test.NewFakeYnab().Api(), AppFilesFake{})
+		app.RunApp(inputReader, output, test.NewFakeYnab().Api(), AppFilesFake{})
 		wg.Done()
 	}()
 
@@ -92,9 +33,9 @@ func TestQQuitsProgram(t *testing.T) {
 
 func TestDisplaysTransactions(t *testing.T) {
 
-	env := NewTestEnv(t)
+	env := test.NewTestEnv(t)
 
-	env.ynab.SetTransactions([]ynabmodel.Transaction{
+	env.Ynab.SetTransactions([]ynabmodel.Transaction{
 		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
 		test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
 		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
