@@ -30,9 +30,28 @@ func TestQQuitsProgram(t *testing.T) {
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
 }
 
+type TestTerminal struct {
+	outputReader *io.PipeReader
+	outputWriter *io.PipeWriter
+	inputReader  *io.PipeReader
+	inputWriter  *io.PipeWriter
+}
+
+func NewTestTerminal() TestTerminal {
+	or, ow := io.Pipe()
+	ir, iw := io.Pipe()
+	return TestTerminal{
+		outputReader: or,
+		outputWriter: ow,
+		inputReader:  ir,
+		inputWriter:  iw,
+	}
+}
+
 func TestDisplaysTransactions(t *testing.T) {
 
 	ynab := test.NewFakeYnab()
+	term := NewTestTerminal()
 
 	ynab.SetTransactions([]ynabmodel.Transaction{
 		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
@@ -40,8 +59,6 @@ func TestDisplaysTransactions(t *testing.T) {
 		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
 	})
 
-	outputReader, outputWriter := io.Pipe()
-	inputReader, inputWriter := io.Pipe()
 	errs := make(chan error, 8)
 
 	wg := sync.WaitGroup{}
@@ -49,8 +66,8 @@ func TestDisplaysTransactions(t *testing.T) {
 	// Run the program
 	wg.Add(1)
 	go func() {
-		runApp(inputReader, outputWriter, ynab.Api(), AppFilesFake{})
-		if err := outputWriter.Close(); err != nil {
+		runApp(term.inputReader, term.outputWriter, ynab.Api(), AppFilesFake{})
+		if err := term.outputWriter.Close(); err != nil {
 			errs <- err
 		}
 		wg.Done()
@@ -62,7 +79,7 @@ func TestDisplaysTransactions(t *testing.T) {
 	go func() {
 		for {
 			b := make([]byte, 8)
-			n, err := outputReader.Read(b)
+			n, err := term.outputReader.Read(b)
 			output = append(output, b[:n]...)
 			if err == io.EOF {
 				break
@@ -77,7 +94,7 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	var err error
 
-	_, err = inputWriter.Write([]byte("q"))
+	_, err = term.inputWriter.Write([]byte("q"))
 	require.NoError(t, err)
 
 	// Wait for the program to finish
