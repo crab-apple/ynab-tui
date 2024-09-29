@@ -1,8 +1,9 @@
+Show transactions as a table
+
 Handle IO errors (including non-200 responses). Perhaps just display the error on the screen
 Refresh transactions
 Use delta when refreshing transactions, to get only the ones that have changed
 Persist cached data to file, so app doesn't have to load all transactions every time it starts
-Show transtactions as a table
 
 Switch budgets
 
