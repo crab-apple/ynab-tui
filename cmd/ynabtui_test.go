@@ -8,6 +8,7 @@ import (
 	"time"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/test"
+	"ynabtui/test/term"
 )
 
 func TestQQuitsProgram(t *testing.T) {
@@ -30,51 +31,10 @@ func TestQQuitsProgram(t *testing.T) {
 	require.False(t, waitTimeout(&wg, 100*time.Millisecond))
 }
 
-type TestTerminal struct {
-	outputReader *io.PipeReader
-	outputWriter *io.PipeWriter
-	inputReader  *io.PipeReader
-	inputWriter  *io.PipeWriter
-	output       []byte
-	errs         chan error
-}
-
-func NewTestTerminal() *TestTerminal {
-	or, ow := io.Pipe()
-	ir, iw := io.Pipe()
-	return &TestTerminal{
-		outputReader: or,
-		outputWriter: ow,
-		inputReader:  ir,
-		inputWriter:  iw,
-		output:       make([]byte, 8),
-		errs:         make(chan error),
-	}
-}
-
-func (term *TestTerminal) ProcessOutput() {
-	for {
-		b := make([]byte, 8)
-		n, err := term.outputReader.Read(b)
-		term.output = append(term.output, b[:n]...)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			term.errs <- err
-			break
-		}
-	}
-}
-
-func (term *TestTerminal) GetOutput() (string, error) {
-	return test.ParseTerminalOutput(term.output)
-}
-
 func TestDisplaysTransactions(t *testing.T) {
 
 	ynab := test.NewFakeYnab()
-	term := NewTestTerminal()
+	tterm := term.NewTestTerminal()
 
 	ynab.SetTransactions([]ynabmodel.Transaction{
 		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
@@ -87,23 +47,21 @@ func TestDisplaysTransactions(t *testing.T) {
 	// Run the program
 	wg.Add(1)
 	go func() {
-		runApp(term.inputReader, term.outputWriter, ynab.Api(), AppFilesFake{})
-		if err := term.outputWriter.Close(); err != nil {
-			term.errs <- err
-		}
+		runApp(tterm.InputReader, tterm.OutputWriter, ynab.Api(), AppFilesFake{})
+		tterm.CleanUp()
 		wg.Done()
 	}()
 
 	// Read the program output
 	wg.Add(1)
 	go func() {
-		term.ProcessOutput()
+		tterm.ProcessOutput()
 		wg.Done()
 	}()
 
 	var err error
 
-	_, err = term.inputWriter.Write([]byte("q"))
+	_, err = tterm.InputWriter.Write([]byte("q"))
 	require.NoError(t, err)
 
 	// Wait for the program to finish
@@ -111,13 +69,13 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	// Check for errors
 	select {
-	case err = <-term.errs:
+	case err = <-tterm.Errs:
 		t.Error(err)
 	default:
 	}
 
 	// Assert output
-	visible, err := term.GetOutput()
+	visible, err := tterm.GetOutput()
 	require.NoError(t, err)
 
 	require.Contains(t, visible, "Last minute groceries")

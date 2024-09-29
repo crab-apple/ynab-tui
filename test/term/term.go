@@ -1,12 +1,60 @@
-package test
+package term
 
 import (
 	"bytes"
 	"errors"
+	"io"
 	"unicode/utf8"
 )
 
-func ParseTerminalOutput(output []byte) (string, error) {
+type TestTerminal struct {
+	OutputReader *io.PipeReader
+	OutputWriter *io.PipeWriter
+	InputReader  *io.PipeReader
+	InputWriter  *io.PipeWriter
+	output       []byte
+	Errs         chan error
+}
+
+func NewTestTerminal() *TestTerminal {
+	or, ow := io.Pipe()
+	ir, iw := io.Pipe()
+	return &TestTerminal{
+		OutputReader: or,
+		OutputWriter: ow,
+		InputReader:  ir,
+		InputWriter:  iw,
+		output:       make([]byte, 8),
+		Errs:         make(chan error),
+	}
+}
+
+func (term *TestTerminal) ProcessOutput() {
+	for {
+		b := make([]byte, 8)
+		n, err := term.OutputReader.Read(b)
+		term.output = append(term.output, b[:n]...)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			term.Errs <- err
+			break
+		}
+	}
+}
+
+func (term *TestTerminal) GetOutput() (string, error) {
+	return parseTerminalOutput(term.output)
+}
+
+func (term *TestTerminal) CleanUp() {
+	if err := term.OutputWriter.Close(); err != nil {
+		term.Errs <- err
+	}
+}
+
+func parseTerminalOutput(output []byte) (string, error) {
 
 	result := make([]byte, 0)
 
