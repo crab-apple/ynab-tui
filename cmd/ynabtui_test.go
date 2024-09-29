@@ -35,6 +35,8 @@ type TestTerminal struct {
 	outputWriter *io.PipeWriter
 	inputReader  *io.PipeReader
 	inputWriter  *io.PipeWriter
+	output       []byte
+	errs         chan error
 }
 
 func NewTestTerminal() TestTerminal {
@@ -45,6 +47,8 @@ func NewTestTerminal() TestTerminal {
 		outputWriter: ow,
 		inputReader:  ir,
 		inputWriter:  iw,
+		output:       make([]byte, 8),
+		errs:         make(chan error),
 	}
 }
 
@@ -59,8 +63,6 @@ func TestDisplaysTransactions(t *testing.T) {
 		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
 	})
 
-	errs := make(chan error, 8)
-
 	wg := sync.WaitGroup{}
 
 	// Run the program
@@ -68,24 +70,23 @@ func TestDisplaysTransactions(t *testing.T) {
 	go func() {
 		runApp(term.inputReader, term.outputWriter, ynab.Api(), AppFilesFake{})
 		if err := term.outputWriter.Close(); err != nil {
-			errs <- err
+			term.errs <- err
 		}
 		wg.Done()
 	}()
 
 	// Read the program output
-	output := make([]byte, 0)
 	wg.Add(1)
 	go func() {
 		for {
 			b := make([]byte, 8)
 			n, err := term.outputReader.Read(b)
-			output = append(output, b[:n]...)
+			term.output = append(term.output, b[:n]...)
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
-				errs <- err
+				term.errs <- err
 				break
 			}
 		}
@@ -102,13 +103,13 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	// Check for errors
 	select {
-	case err = <-errs:
+	case err = <-term.errs:
 		t.Error(err)
 	default:
 	}
 
 	// Assert output
-	visible, err := test.ParseTerminalOutput(output)
+	visible, err := test.ParseTerminalOutput(term.output)
 	require.NoError(t, err)
 
 	require.Contains(t, visible, "Last minute groceries")
