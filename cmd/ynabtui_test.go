@@ -11,6 +11,20 @@ import (
 	"ynabtui/test/term"
 )
 
+type TestEnv struct {
+	ynab  *test.FakeYnab
+	files AppFilesFake
+	tterm *term.TestTerminal
+}
+
+func NewTestEnv() TestEnv {
+	return TestEnv{
+		ynab:  test.NewFakeYnab(),
+		files: AppFilesFake{},
+		tterm: term.NewTestTerminal(),
+	}
+}
+
 func TestQQuitsProgram(t *testing.T) {
 
 	output := io.Discard
@@ -33,10 +47,9 @@ func TestQQuitsProgram(t *testing.T) {
 
 func TestDisplaysTransactions(t *testing.T) {
 
-	ynab := test.NewFakeYnab()
-	tterm := term.NewTestTerminal()
+	env := NewTestEnv()
 
-	ynab.SetTransactions([]ynabmodel.Transaction{
+	env.ynab.SetTransactions([]ynabmodel.Transaction{
 		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
 		test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
 		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
@@ -47,21 +60,21 @@ func TestDisplaysTransactions(t *testing.T) {
 	// Run the program
 	wg.Add(1)
 	go func() {
-		runApp(tterm.InputReader, tterm.OutputWriter, ynab.Api(), AppFilesFake{})
-		tterm.CleanUp()
+		runApp(env.tterm.InputReader, env.tterm.OutputWriter, env.ynab.Api(), env.files)
+		env.tterm.CleanUp()
 		wg.Done()
 	}()
 
 	// Read the program output
 	wg.Add(1)
 	go func() {
-		tterm.ProcessOutput()
+		env.tterm.ProcessOutput()
 		wg.Done()
 	}()
 
 	var err error
 
-	_, err = tterm.InputWriter.Write([]byte("q"))
+	_, err = env.tterm.InputWriter.Write([]byte("q"))
 	require.NoError(t, err)
 
 	// Wait for the program to finish
@@ -69,13 +82,13 @@ func TestDisplaysTransactions(t *testing.T) {
 
 	// Check for errors
 	select {
-	case err = <-tterm.Errs:
+	case err = <-env.tterm.Errs:
 		t.Error(err)
 	default:
 	}
 
 	// Assert output
-	visible, err := tterm.GetOutput()
+	visible, err := env.tterm.GetOutput()
 	require.NoError(t, err)
 
 	require.Contains(t, visible, "Last minute groceries")
