@@ -1,15 +1,14 @@
-package main
+package test
 
 import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	"ynabtui/internal/ynabmodel"
-	"ynabtui/test"
 )
 
 func TestQQuitsProgram(t *testing.T) {
 
-	env := test.NewTestEnv(t)
+	env := NewTestEnv(t)
 
 	env.Run()
 
@@ -20,12 +19,12 @@ func TestQQuitsProgram(t *testing.T) {
 
 func TestDisplaysTransactions(t *testing.T) {
 
-	env := test.NewTestEnv(t)
+	env := NewTestEnv(t)
 
 	env.Ynab.SetTransactions([]ynabmodel.Transaction{
-		test.MakeTransaction(&test.AccChecking, &test.CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
-		test.MakeTransaction(&test.AccCash, &test.CatGroceries, "2020-01-02", 3500, "Chewing gum"),
-		test.MakeTransaction(&test.AccChecking, &test.CatRent, "2020-01-02", 1000000, ""),
+		MakeTransaction(&AccChecking, &CatGroceries, "2020-01-01", 12340, "Last minute groceries"),
+		MakeTransaction(&AccCash, &CatGroceries, "2020-01-02", 3500, "Chewing gum"),
+		MakeTransaction(&AccChecking, &CatRent, "2020-01-02", 1000000, ""),
 	})
 
 	env.Run()
