@@ -57,6 +57,8 @@ func (m Model) readTransactions() tea.Msg {
 		panic(err)
 	}
 
+	transactions = lo.Slice(transactions, 0, 10)
+
 	return readTransactionsMsg{
 		transactions: transactions,
 	}
