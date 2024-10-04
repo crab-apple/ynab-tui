@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
 	"log/slog"
@@ -14,9 +15,10 @@ type Model struct {
 	// TODO I'm not sure that it makes sense to have dependencies in the model. Should revisit this later.
 	api ynabapi.YnabApi
 
-	transactions []ynabmodel.Transaction
-	cursor       int
-	selected     map[int]struct{}
+	transactions      []ynabmodel.Transaction
+	transactionsTable table.Model
+	cursor            int
+	selected          map[int]struct{}
 }
 
 type readTransactionsMsg struct {
@@ -25,10 +27,26 @@ type readTransactionsMsg struct {
 
 func InitialModel(api ynabapi.YnabApi) Model {
 
+	t := table.New(
+		table.WithFocused(true),
+	)
+
+	t.SetHeight(15)
+
+	columns := []table.Column{
+		{Title: "Date", Width: 15},
+		{Title: "Account", Width: 15},
+		{Title: "Category", Width: 30},
+		{Title: "Amount", Width: 15},
+		{Title: "Memo", Width: 30},
+	}
+	t.SetColumns(columns)
+
 	return Model{
 		api: api,
 
-		transactions: nil,
+		transactions:      nil,
+		transactionsTable: t,
 
 		// A map which indicates which choices are selected. We're using
 		// the  map like a mathematical set. The keys refer to the indexes
@@ -117,6 +135,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	// The header
 	s := "Recent transactions:\n\n"
+
+	s += m.transactionsTable.View() + "\n"
 
 	// Iterate over our choices
 	for i, transaction := range m.transactions {
