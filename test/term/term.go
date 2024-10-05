@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"github.com/samber/lo"
 	"io"
+	"log/slog"
 	"unicode/utf8"
 )
 
@@ -96,7 +96,13 @@ loop:
 			if l == 0 {
 				return "", errors.New("rune error, empty input")
 			} else {
-				return "", fmt.Errorf("rune error, invalid encoding. Next bytes: %s", hex.EncodeToString(lo.Splice(output[i:], 0, 10)))
+				// Invalid encoding
+				// Likely just means that the output is still in the process of being written to and what we can see now is incomplete
+				slog.Debug(
+					"rune error, invalid encoding",
+					"next bytes", hex.EncodeToString(lo.Splice(output[i:], 0, 10)),
+				)
+				break loop
 			}
 		}
 
