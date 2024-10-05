@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
 	"log/slog"
+	"ynabtui/internal/components/responsivetable"
 	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/internal/ynabmodel/date"
@@ -16,7 +17,7 @@ type Model struct {
 	api ynabapi.YnabApi
 
 	transactions      []ynabmodel.Transaction
-	transactionsTable table.Model
+	transactionsTable responsivetable.Model
 }
 
 type readTransactionsMsg struct {
@@ -25,7 +26,7 @@ type readTransactionsMsg struct {
 
 func InitialModel(api ynabapi.YnabApi) Model {
 
-	t := table.New(
+	t := responsivetable.New(
 		table.WithFocused(true),
 	)
 
