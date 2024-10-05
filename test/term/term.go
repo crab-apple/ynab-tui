@@ -2,7 +2,10 @@ package term
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"github.com/samber/lo"
 	"io"
 	"unicode/utf8"
 )
@@ -90,7 +93,11 @@ loop:
 
 		r, l := utf8.DecodeRune(output[i:])
 		if r == utf8.RuneError {
-			return "", errors.New("rune error")
+			if l == 0 {
+				return "", errors.New("rune error, empty input")
+			} else {
+				return "", fmt.Errorf("rune error, invalid encoding. Next bytes: %s", hex.EncodeToString(lo.Splice(output[i:], 0, 10)))
+			}
 		}
 
 		if r == '\r' {
