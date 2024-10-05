@@ -93,6 +93,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case readTransactionsMsg:
 		m.transactions = msg.transactions
+		rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
+			return makeTransactionRow(item)
+		})
+		m.transactionsTable.SetRows(rows)
 
 	// Is it a key press?
 	case tea.KeyMsg:
@@ -162,6 +166,10 @@ func (m Model) View() string {
 
 	// Send the UI for rendering
 	return s
+}
+
+func makeTransactionRow(t ynabmodel.Transaction) table.Row {
+	return table.Row{t.Date.String(), t.AccountName, *t.CategoryName, t.Amount.Format(), t.Memo}
 }
 
 func renderTransaction(t ynabmodel.Transaction) string {
