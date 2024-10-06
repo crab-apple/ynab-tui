@@ -1,8 +1,8 @@
 package test
 
 import (
-	"github.com/stretchr/testify/require"
-	"strings"
+	"bytes"
+	"github.com/charmbracelet/x/exp/teatest"
 	"testing"
 	"time"
 	"ynabtui/internal/ynabmodel"
@@ -12,11 +12,11 @@ func TestQQuitsProgram(t *testing.T) {
 
 	env := NewTestEnv(t)
 
-	env.Run()
+	tm := env.Start()
 
-	env.Type('q')
+	tm.Type("q")
 
-	env.WaitFinish()
+	tm.WaitFinished(t, teatest.WithFinalTimeout(500*time.Millisecond))
 }
 
 func TestDisplaysTransactions(t *testing.T) {
@@ -29,16 +29,11 @@ func TestDisplaysTransactions(t *testing.T) {
 		MakeTransaction(&AccChecking, &CatRent, "2020-01-02", 1000000, ""),
 	})
 
-	env.Run()
+	env.Start()
 
-	output := env.WaitUntil(func(output string) bool {
-		return strings.Contains(output, "gum")
-	}, 1*time.Second)
+	env.AssertOutput(func(bts []byte) bool {
+		return bytes.Contains(bts, []byte("Last minute groceries")) && bytes.Contains(bts, []byte("Chewing gum"))
+	})
 
-	require.Contains(t, output, "Last minute groceries")
-	require.Contains(t, output, "Chewing gum")
-
-	env.Type('q')
-
-	env.WaitFinish()
+	env.Quit()
 }
