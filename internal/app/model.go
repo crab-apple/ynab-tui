@@ -32,12 +32,12 @@ func InitialModel(api ynabapi.YnabApi) Model {
 
 	t.SetHeight(15)
 
-	columns := []table.Column{
-		{Title: "Date", Width: 15},
-		{Title: "Account", Width: 15},
-		{Title: "Category", Width: 30},
-		{Title: "Amount", Width: 15},
-		{Title: "Memo", Width: 30},
+	columns := []responsivetable.Column{
+		{Title: "Date"},
+		{Title: "Account"},
+		{Title: "Category"},
+		{Title: "Amount"},
+		{Title: "Memo"},
 	}
 	t.SetColumns(columns)
 
@@ -90,6 +90,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return makeTransactionRow(item)
 		})
 		m.transactionsTable.SetRows(rows)
+
+	case tea.WindowSizeMsg:
+		m.transactionsTable.SetWidth(msg.Width)
 
 	// Is it a key press?
 	case tea.KeyMsg:

@@ -5,6 +5,10 @@ Refresh transactions
 Use delta when refreshing transactions, to get only the ones that have changed
 Persist cached data to file, so app doesn't have to load all transactions every time it starts
 
+improve column widths. Ideas:
+  weighed column widths
+  max column widths (e.g. we know that date never needs more than 10 chars)
+  column widths automatically adjust to content
 
 term.go is complex enough to need its own tests. Also consider "converting" bytes to runes as they come
 

@@ -22,7 +22,7 @@ func NewTestEnv(t *testing.T) *TestEnv {
 }
 
 func (env *TestEnv) Start() *teatest.TestModel {
-	env.testModel = teatest.NewTestModel(env.t, app.InitialModel(env.Ynab.Api()))
+	env.testModel = teatest.NewTestModel(env.t, app.InitialModel(env.Ynab.Api()), teatest.WithInitialTermSize(120, 30))
 	return env.testModel
 }
 

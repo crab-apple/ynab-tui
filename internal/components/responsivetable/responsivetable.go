@@ -5,16 +5,34 @@ import (
 )
 
 type Model struct {
-	table table.Model
+	table   table.Model
+	width   int
+	columns []Column
 }
 
 type Column struct {
 	Title string
-	Width int32
 }
 
-func (m *Model) SetColumns(c []table.Column) {
-	m.table.SetColumns(c)
+func (m *Model) SetColumns(c []Column) {
+	m.columns = c
+	m.setColumnsInner()
+}
+
+func (m *Model) setColumnsInner() {
+
+	styles := table.DefaultStyles() // TODO get a reference of the real styles if we want to change them.
+
+	tcs := make([]table.Column, 0)
+	for _, c := range m.columns {
+		spaceAvailable := m.width / len(m.columns)
+		width := spaceAvailable - styles.Header.GetHorizontalPadding()
+		tcs = append(tcs, table.Column{
+			Title: c.Title,
+			Width: width,
+		})
+	}
+	m.table.SetColumns(tcs)
 }
 
 func (m *Model) SetRows(c []table.Row) {
@@ -22,7 +40,9 @@ func (m *Model) SetRows(c []table.Row) {
 }
 
 func (m *Model) SetWidth(w int) {
+	m.width = w
 	m.table.SetWidth(w)
+	m.setColumnsInner()
 }
 
 func (m *Model) SetHeight(h int) {
