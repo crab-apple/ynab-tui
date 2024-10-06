@@ -68,8 +68,6 @@ func (m Model) readTransactions() tea.Msg {
 		panic(err)
 	}
 
-	transactions = lo.Slice(transactions, 0, 10)
-
 	return readTransactionsMsg{
 		transactions: transactions,
 	}
@@ -93,6 +91,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		m.transactionsTable.SetWidth(msg.Width)
+		m.transactionsTable.SetHeight(msg.Height)
 
 	// Is it a key press?
 	case tea.KeyMsg:
@@ -112,16 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 func (m Model) View() string {
-	// The header
-	s := "Recent transactions:\n\n"
-
-	s += m.transactionsTable.View() + "\n"
-
-	// The footer
-	s += "\nPress q to quit.\n"
-
-	// Send the UI for rendering
-	return s
+	return m.transactionsTable.View()
 }
 
 func makeTransactionRow(t ynabmodel.Transaction) table.Row {
