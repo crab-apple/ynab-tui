@@ -3,57 +3,17 @@ package tea
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
+	btea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
 	"log/slog"
+	tea "ynabtui/internal/ui/model"
 	"ynabtui/internal/ui/tea/components/responsivetable"
 	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
-	"ynabtui/internal/ynabmodel/date"
 )
 
-type UI struct {
-	api ynabapi.YnabApi
-}
-
-func NewUI(api ynabapi.YnabApi) UI {
-	return UI{api: api}
-}
-
-func (ui UI) FirstLoad() Screen {
-	since, _ := date.Today().MinusDays(7)
-
-	budgets, err := ui.api.ReadBudgets()
-	if err != nil {
-		// TODO handle
-		panic(err)
-	}
-
-	budget := lo.MaxBy(budgets, func(a ynabmodel.Budget, b ynabmodel.Budget) bool {
-		return a.LastModifiedOn.After(b.LastModifiedOn)
-	})
-
-	transactions, err := ui.api.ReadTransactions(budget.Id, since)
-	if err != nil {
-		// TODO handle
-		panic(err)
-	}
-
-	screen := TransactionsScreen{
-		transactions: transactions,
-	}
-	return screen
-}
-
-type Screen interface {
-}
-
-type TransactionsScreen struct {
-	transactions []ynabmodel.Transaction
-}
-
 type Model struct {
-	uiModel UI
+	uiModel tea.UI
 
 	transactions []ynabmodel.Transaction
 	table        responsivetable.Model
@@ -65,7 +25,7 @@ type updateScreenMsg struct {
 
 func InitialModel(api ynabapi.YnabApi) Model {
 
-	uiModel := NewUI(api)
+	uiModel := tea.NewUI(api)
 
 	t := responsivetable.New(
 		table.WithFocused(true),
@@ -89,15 +49,15 @@ func InitialModel(api ynabapi.YnabApi) Model {
 	}
 }
 
-func (m Model) Init() tea.Cmd {
-	return func() tea.Msg {
+func (m Model) Init() btea.Cmd {
+	return func() btea.Msg {
 		screen := m.uiModel.FirstLoad()
 		return updateScreenMsg{
 			screen: screen,
 		}
 	}
 }
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg btea.Msg) (btea.Model, btea.Cmd) {
 
 	slog.Debug("Received message", "type", fmt.Sprintf("%T", msg), "value", msg)
 
@@ -105,28 +65,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case updateScreenMsg:
 		switch screen := msg.screen.(type) {
-		case TransactionsScreen:
-			m.transactions = screen.transactions
+		case tea.TransactionsScreen:
+			m.transactions = screen.Transactions
 			rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
 				return makeTransactionRow(item)
 			})
 			m.table.SetRows(rows)
 		}
 
-	case tea.WindowSizeMsg:
+	case btea.WindowSizeMsg:
 		m.table.SetWidth(msg.Width)
 		m.table.SetHeight(msg.Height)
 
 	// Is it a key press?
-	case tea.KeyMsg:
+	case btea.KeyMsg:
 
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
 		// These keys should exit the program.
 		case "ctrl+c", "q":
-			return m, tea.Quit
-
+			return m, btea.Quit
 		}
 	}
 
