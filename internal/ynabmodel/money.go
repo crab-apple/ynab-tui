@@ -3,17 +3,40 @@ package ynabmodel
 import (
 	"errors"
 	"golang.org/x/text/message"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Money struct {
 	cents int64
 }
 
-func NewMoney(thousandths int64) (Money, error) {
+func NewMoneyFromThousandths(thousandths int64) (Money, error) {
 	if thousandths%10 != 0 {
 		return Money{}, errors.New("only two decimal places supported")
 	}
 	return Money{cents: thousandths / 10}, nil
+}
+
+func NewMoneyFromString(str string) (Money, error) {
+
+	matches, err := regexp.MatchString("^\\d+\\.\\d\\d$", str)
+	if err != nil {
+		return Money{}, err
+	}
+
+	if !matches {
+		return Money{}, errors.New("Money strings must contain at least one digit to the left of the point and exactly two digits to the right")
+	}
+
+	centsStr := strings.ReplaceAll(str, ".", "")
+	val, err := strconv.Atoi(centsStr)
+	if err != nil {
+		return Money{}, err
+	}
+
+	return Money{cents: int64(val)}, nil
 }
 
 func (m Money) Format() string {

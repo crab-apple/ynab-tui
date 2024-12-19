@@ -83,7 +83,7 @@ func mapTransaction(t ynabclientgen.TransactionDetail) (ynabmodel.Transaction, e
 		return ynabmodel.Transaction{}, err
 	}
 
-	amount, err := ynabmodel.NewMoney(t.Amount)
+	amount, err := ynabmodel.NewMoneyFromThousandths(t.Amount)
 	if err != nil {
 		return ynabmodel.Transaction{}, err
 	}

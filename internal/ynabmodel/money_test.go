@@ -1,18 +1,61 @@
 package ynabmodel
 
 import (
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestCreateMoney(t *testing.T) {
-	_, err := NewMoney(12340)
+	_, err := NewMoneyFromThousandths(12340)
 	require.NoError(t, err)
 }
 
 func TestNoThousandthsAccepted(t *testing.T) {
-	_, err := NewMoney(12345)
+	_, err := NewMoneyFromThousandths(12345)
 	require.Error(t, err)
+}
+
+func TestShouldParseStringWithCents(t *testing.T) {
+
+	// When
+	m, err := NewMoneyFromString("12.34")
+
+	// Then
+	require.NoError(t, err)
+	assert.Equal(t, int64(1234), m.cents)
+
+	// When
+	m, err = NewMoneyFromString("0.34")
+
+	// Then
+	require.NoError(t, err)
+	assert.Equal(t, int64(34), m.cents)
+}
+
+func TestShouldNotAcceptInvalidStrings(t *testing.T) {
+
+	expectedMsg := "Money strings must contain at least one digit to the left of the point and exactly two digits to the right"
+
+	var invalidStrings = []string{
+		"1111",
+		"1111.",
+		"1111.1",
+		"1111.123",
+		".12",
+		"1.12.34",
+	}
+
+	for _, str := range invalidStrings {
+		t.Run(str, func(t *testing.T) {
+			// When
+			_, err := NewMoneyFromString(str)
+
+			// Then
+			require.Error(t, err)
+			assert.Equal(t, expectedMsg, err.Error())
+		})
+	}
 }
 
 func TestFormat(t *testing.T) {
@@ -34,7 +77,7 @@ func TestFormat(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			m, _ := NewMoney(tc.input)
+			m, _ := NewMoneyFromThousandths(tc.input)
 			require.Equal(t, tc.output, m.Format())
 		})
 	}

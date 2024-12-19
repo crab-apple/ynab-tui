@@ -30,14 +30,14 @@ var (
 	}
 )
 
-func MakeTransaction(account *ynabmodel.Account, category *ynabmodel.Category, dateStr string, amount int64, memo string) ynabmodel.Transaction {
+func MakeTransaction(account *ynabmodel.Account, category *ynabmodel.Category, dateStr string, amount string, memo string) ynabmodel.Transaction {
 
 	d, err := date.Parse(dateStr)
 	if err != nil {
 		panic(err)
 	}
 
-	amountMoney, err := ynabmodel.NewMoney(amount)
+	amountMoney, err := ynabmodel.NewMoneyFromString(amount)
 	if err != nil {
 		panic(err)
 	}
