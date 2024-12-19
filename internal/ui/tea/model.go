@@ -20,6 +20,10 @@ func NewUI(api ynabapi.YnabApi) UI {
 	return UI{api: api}
 }
 
+type TransactionsScreen struct {
+	transactions []ynabmodel.Transaction
+}
+
 type Model struct {
 	uiModel UI
 
@@ -27,8 +31,8 @@ type Model struct {
 	table        responsivetable.Model
 }
 
-type readTransactionsMsg struct {
-	transactions []ynabmodel.Transaction
+type updateScreenMsg struct {
+	screen any
 }
 
 func InitialModel(api ynabapi.YnabApi) Model {
@@ -76,8 +80,10 @@ func (m Model) readTransactions() tea.Msg {
 		panic(err)
 	}
 
-	return readTransactionsMsg{
-		transactions: transactions,
+	return updateScreenMsg{
+		screen: TransactionsScreen{
+			transactions: transactions,
+		},
 	}
 }
 
@@ -90,12 +96,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
-	case readTransactionsMsg:
-		m.transactions = msg.transactions
-		rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
-			return makeTransactionRow(item)
-		})
-		m.table.SetRows(rows)
+	case updateScreenMsg:
+		switch screen := msg.screen.(type) {
+		case TransactionsScreen:
+			m.transactions = screen.transactions
+			rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
+				return makeTransactionRow(item)
+			})
+			m.table.SetRows(rows)
+		}
 
 	case tea.WindowSizeMsg:
 		m.table.SetWidth(msg.Width)
