@@ -20,6 +20,34 @@ func NewUI(api ynabapi.YnabApi) UI {
 	return UI{api: api}
 }
 
+func (ui UI) FirstLoad() Screen {
+	since, _ := date.Today().MinusDays(7)
+
+	budgets, err := ui.api.ReadBudgets()
+	if err != nil {
+		// TODO handle
+		panic(err)
+	}
+
+	budget := lo.MaxBy(budgets, func(a ynabmodel.Budget, b ynabmodel.Budget) bool {
+		return a.LastModifiedOn.After(b.LastModifiedOn)
+	})
+
+	transactions, err := ui.api.ReadTransactions(budget.Id, since)
+	if err != nil {
+		// TODO handle
+		panic(err)
+	}
+
+	screen := TransactionsScreen{
+		transactions: transactions,
+	}
+	return screen
+}
+
+type Screen interface {
+}
+
 type TransactionsScreen struct {
 	transactions []ynabmodel.Transaction
 }
@@ -61,34 +89,13 @@ func InitialModel(api ynabapi.YnabApi) Model {
 	}
 }
 
-func (m Model) readTransactions() tea.Msg {
-	since, _ := date.Today().MinusDays(7)
-
-	budgets, err := m.uiModel.api.ReadBudgets()
-	if err != nil {
-		// TODO handle
-		panic(err)
-	}
-
-	budget := lo.MaxBy(budgets, func(a ynabmodel.Budget, b ynabmodel.Budget) bool {
-		return a.LastModifiedOn.After(b.LastModifiedOn)
-	})
-
-	transactions, err := m.uiModel.api.ReadTransactions(budget.Id, since)
-	if err != nil {
-		// TODO handle
-		panic(err)
-	}
-
-	return updateScreenMsg{
-		screen: TransactionsScreen{
-			transactions: transactions,
-		},
-	}
-}
-
 func (m Model) Init() tea.Cmd {
-	return m.readTransactions
+	return func() tea.Msg {
+		screen := m.uiModel.FirstLoad()
+		return updateScreenMsg{
+			screen: screen,
+		}
+	}
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
