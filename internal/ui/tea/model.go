@@ -23,8 +23,8 @@ func NewUI(api ynabapi.YnabApi) UI {
 type Model struct {
 	uiModel UI
 
-	transactions      []ynabmodel.Transaction
-	transactionsTable responsivetable.Model
+	transactions []ynabmodel.Transaction
+	table        responsivetable.Model
 }
 
 type readTransactionsMsg struct {
@@ -51,9 +51,9 @@ func InitialModel(api ynabapi.YnabApi) Model {
 	t.SetColumns(columns)
 
 	return Model{
-		uiModel:           uiModel,
-		transactions:      nil,
-		transactionsTable: t,
+		uiModel:      uiModel,
+		transactions: nil,
+		table:        t,
 	}
 }
 
@@ -95,11 +95,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
 			return makeTransactionRow(item)
 		})
-		m.transactionsTable.SetRows(rows)
+		m.table.SetRows(rows)
 
 	case tea.WindowSizeMsg:
-		m.transactionsTable.SetWidth(msg.Width)
-		m.transactionsTable.SetHeight(msg.Height)
+		m.table.SetWidth(msg.Width)
+		m.table.SetHeight(msg.Height)
 
 	// Is it a key press?
 	case tea.KeyMsg:
@@ -119,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 func (m Model) View() string {
-	return m.transactionsTable.View()
+	return m.table.View()
 }
 
 func makeTransactionRow(t ynabmodel.Transaction) table.Row {
