@@ -1,4 +1,4 @@
-package app
+package tea
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
 	"log/slog"
-	"ynabtui/internal/components/responsivetable"
+	"ynabtui/internal/ui/tea/components/responsivetable"
 	"ynabtui/internal/ynabapi"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/internal/ynabmodel/date"

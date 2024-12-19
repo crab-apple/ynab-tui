@@ -4,12 +4,12 @@ import (
 	"github.com/charmbracelet/x/exp/teatest"
 	"testing"
 	"time"
-	"ynabtui/internal/app"
+	"ynabtui/internal/ui/tea"
 )
 
 func TestQQuitsProgram(t *testing.T) {
 
-	tm := teatest.NewTestModel(t, app.InitialModel(NewFakeYnab().Api()), teatest.WithInitialTermSize(120, 30))
+	tm := teatest.NewTestModel(t, tea.InitialModel(NewFakeYnab().Api()), teatest.WithInitialTermSize(120, 30))
 
 	tm.Type("q")
 
