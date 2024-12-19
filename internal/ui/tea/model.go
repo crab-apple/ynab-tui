@@ -12,9 +12,16 @@ import (
 	"ynabtui/internal/ynabmodel/date"
 )
 
-type Model struct {
-	// TODO I'm not sure that it makes sense to have dependencies in the model. Should revisit this later.
+type UI struct {
 	api ynabapi.YnabApi
+}
+
+func NewUI(api ynabapi.YnabApi) UI {
+	return UI{api: api}
+}
+
+type Model struct {
+	uiModel UI
 
 	transactions      []ynabmodel.Transaction
 	transactionsTable responsivetable.Model
@@ -25,6 +32,8 @@ type readTransactionsMsg struct {
 }
 
 func InitialModel(api ynabapi.YnabApi) Model {
+
+	uiModel := NewUI(api)
 
 	t := responsivetable.New(
 		table.WithFocused(true),
@@ -42,8 +51,7 @@ func InitialModel(api ynabapi.YnabApi) Model {
 	t.SetColumns(columns)
 
 	return Model{
-		api: api,
-
+		uiModel:           uiModel,
 		transactions:      nil,
 		transactionsTable: t,
 	}
@@ -52,7 +60,7 @@ func InitialModel(api ynabapi.YnabApi) Model {
 func (m Model) readTransactions() tea.Msg {
 	since, _ := date.Today().MinusDays(7)
 
-	budgets, err := m.api.ReadBudgets()
+	budgets, err := m.uiModel.api.ReadBudgets()
 	if err != nil {
 		// TODO handle
 		panic(err)
@@ -62,7 +70,7 @@ func (m Model) readTransactions() tea.Msg {
 		return a.LastModifiedOn.After(b.LastModifiedOn)
 	})
 
-	transactions, err := m.api.ReadTransactions(budget.Id, since)
+	transactions, err := m.uiModel.api.ReadTransactions(budget.Id, since)
 	if err != nil {
 		// TODO handle
 		panic(err)
