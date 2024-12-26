@@ -8,6 +8,7 @@ import (
 	openapitypes "github.com/oapi-codegen/runtime/types"
 	"github.com/samber/lo"
 	"net/http"
+	"ynabtui/internal/lang/optional"
 	"ynabtui/internal/ynabclientgen"
 	"ynabtui/internal/ynabmodel"
 	"ynabtui/internal/ynabmodel/date"
@@ -98,8 +99,8 @@ func mapTransaction(t ynabclientgen.TransactionDetail) (ynabmodel.Transaction, e
 		Date:         d,
 		AccountId:    t.AccountId,
 		AccountName:  t.AccountName,
-		CategoryId:   t.CategoryId,
-		CategoryName: t.CategoryName,
+		CategoryId:   optional.OfPointer(t.CategoryId),
+		CategoryName: optional.OfPointer(t.CategoryName),
 		Amount:       amount,
 		Memo:         memo,
 	}, nil

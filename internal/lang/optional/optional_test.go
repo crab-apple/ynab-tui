@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestShouldCreateWithPresentValue(t *testing.T) {
+func TestOfShouldCreateWithPresentValue(t *testing.T) {
 
 	// When
 	optional := Of("foo")
@@ -93,4 +93,33 @@ func TestAsPointerShouldReturnPointerToValueIfPresent(t *testing.T) {
 
 	// Then
 	assert.Equal(t, "hello", *pointer)
+}
+
+type StrContainer struct {
+	myString string
+}
+
+func TestMapShouldReturnEmptyOptionalIfEmpty(t *testing.T) {
+	// Given
+	opt := Empty[StrContainer]()
+
+	// When
+	result := Map(opt, func(x StrContainer) string { return x.myString })
+
+	// Then
+	_, present := result.Get()
+	assert.False(t, present)
+}
+
+func TestMapShouldReturnOptionalWithResultIfPresent(t *testing.T) {
+	// Given
+	opt := Of[StrContainer](StrContainer{myString: "hello"})
+
+	// When
+	result := Map(opt, func(x StrContainer) string { return x.myString })
+
+	// Then
+	value, present := result.Get()
+	assert.True(t, present)
+	assert.Equal(t, "hello", value)
 }

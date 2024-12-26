@@ -2,6 +2,7 @@ package ynabmodel
 
 import (
 	"github.com/google/uuid"
+	"ynabtui/internal/lang/optional"
 	"ynabtui/internal/ynabmodel/date"
 )
 
@@ -10,8 +11,8 @@ type Transaction struct {
 	Date         date.Date
 	AccountId    uuid.UUID
 	AccountName  string
-	CategoryId   *uuid.UUID
-	CategoryName *string
+	CategoryId   optional.Optional[uuid.UUID]
+	CategoryName optional.Optional[string]
 	Amount       Money
 	Memo         string
 }

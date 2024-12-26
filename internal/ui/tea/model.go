@@ -98,5 +98,5 @@ func (m Model) View() string {
 }
 
 func makeTransactionRow(t ynabmodel.Transaction) table.Row {
-	return table.Row{t.Date.String(), t.AccountName, *t.CategoryName, t.Amount.Format(), t.Memo}
+	return table.Row{t.Date.String(), t.AccountName, t.CategoryName.Or(""), t.Amount.Format(), t.Memo}
 }

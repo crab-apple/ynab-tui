@@ -23,6 +23,13 @@ func (o Optional[Value]) AsPointer() *Value {
 	return nil
 }
 
+func Map[V any, R any](opt Optional[V], f func(V) R) Optional[R] {
+	if opt.exists {
+		return Of(f(opt.value))
+	}
+	return Empty[R]()
+}
+
 func Empty[Value any]() Optional[Value] {
 	var empty Value
 	return Optional[Value]{empty, false}
