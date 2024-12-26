@@ -6,8 +6,8 @@ type Table struct {
 }
 
 type Column struct {
-	key     string
-	display string
+	Key     string
+	Display string
 }
 
 type Row map[string]string

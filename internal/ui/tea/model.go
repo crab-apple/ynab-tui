@@ -6,14 +6,13 @@ import (
 	btea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
 	"log/slog"
-	tea "ynabtui/internal/ui/model"
+	uimodel "ynabtui/internal/ui/model"
 	"ynabtui/internal/ui/tea/components/responsivetable"
 	"ynabtui/internal/ynabapi"
-	"ynabtui/internal/ynabmodel"
 )
 
 type Model struct {
-	uiModel tea.UI
+	uiModel uimodel.UI
 
 	table responsivetable.Model
 }
@@ -24,7 +23,7 @@ type updateScreenMsg struct {
 
 func InitialModel(api ynabapi.YnabApi) Model {
 
-	uiModel := tea.NewUI(api)
+	uiModel := uimodel.NewUI(api)
 
 	t := responsivetable.New(
 		table.WithFocused(true),
@@ -54,21 +53,18 @@ func (m Model) Update(msg btea.Msg) (btea.Model, btea.Cmd) {
 
 	case updateScreenMsg:
 		switch screen := msg.screen.(type) {
-		case tea.TransactionsScreen:
+		case uimodel.TransactionsScreen:
 
-			columns := []responsivetable.Column{
-				{Title: "Date"},
-				{Title: "Account"},
-				{Title: "Category"},
-				{Title: "Amount"},
-				{Title: "Memo"},
-			}
-			m.table.SetColumns(columns)
+			m.table.SetColumns(lo.Map(screen.Table().Columns, func(col uimodel.Column, _ int) responsivetable.Column {
+				return responsivetable.Column{Title: col.Display}
+			}))
 
-			rows := lo.Map(screen.Transactions, func(item ynabmodel.Transaction, i int) table.Row {
-				return makeTransactionRow(item)
-			})
-			m.table.SetRows(rows)
+			m.table.SetRows(
+				lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
+					return lo.Map(screen.Table().Columns, func(col uimodel.Column, _ int) string {
+						return row[col.Key]
+					})
+				}))
 		}
 
 	case btea.WindowSizeMsg:
@@ -93,8 +89,4 @@ func (m Model) Update(msg btea.Msg) (btea.Model, btea.Cmd) {
 }
 func (m Model) View() string {
 	return m.table.View()
-}
-
-func makeTransactionRow(t ynabmodel.Transaction) table.Row {
-	return table.Row{t.Date.String(), t.AccountName, t.CategoryName.Or(""), t.Amount.Format(), t.Memo}
 }

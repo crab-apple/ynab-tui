@@ -12,11 +12,11 @@ type TransactionsScreen struct {
 func (ts TransactionsScreen) Table() Table {
 	return Table{
 		Columns: []Column{
-			{key: "date", display: "Date"},
-			{key: "account", display: "Account"},
-			{key: "category", display: "Category"},
-			{key: "amount", display: "Amount"},
-			{key: "memo", display: "Memo"},
+			{Key: "date", Display: "Date"},
+			{Key: "account", Display: "Account"},
+			{Key: "category", Display: "Category"},
+			{Key: "amount", Display: "Amount"},
+			{Key: "memo", Display: "Memo"},
 		},
 		Rows: lo.Map(ts.Transactions, func(t ynabmodel.Transaction, i int) Row {
 			row := make(Row)

@@ -34,11 +34,11 @@ func TestShouldContainColumnInformation(t *testing.T) {
 
 	// Then
 	assert.Equal(t, []Column{
-		{key: "date", display: "Date"},
-		{key: "account", display: "Account"},
-		{key: "category", display: "Category"},
-		{key: "amount", display: "Amount"},
-		{key: "memo", display: "Memo"},
+		{Key: "date", Display: "Date"},
+		{Key: "account", Display: "Account"},
+		{Key: "category", Display: "Category"},
+		{Key: "amount", Display: "Amount"},
+		{Key: "memo", Display: "Memo"},
 	}, table.Columns)
 }
 
