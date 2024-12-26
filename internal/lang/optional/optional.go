@@ -24,3 +24,10 @@ func Empty[Value any]() Optional[Value] {
 func Of[Value any](value Value) Optional[Value] {
 	return Optional[Value]{value, true}
 }
+
+func OfPointer[Value any](p *Value) Optional[Value] {
+	if p == nil {
+		return Empty[Value]()
+	}
+	return Of(*p)
+}

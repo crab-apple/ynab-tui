@@ -47,3 +47,29 @@ func TestOrShouldReturnDefaultValueIfEmpty(t *testing.T) {
 	// Then
 	assert.Equal(t, "default", result)
 }
+
+func TestShouldCreateEmptyFromNilPointer(t *testing.T) {
+	// Given
+	var pointer *string = nil
+
+	// When
+	result := OfPointer(pointer)
+
+	// Then
+	_, present := result.Get()
+	assert.False(t, present)
+}
+
+func TestShouldCreatePresentFromNonNilPointer(t *testing.T) {
+	// Given
+	str := "hello"
+	var pointer *string = &str
+
+	// When
+	result := OfPointer(pointer)
+
+	// Then
+	value, present := result.Get()
+	assert.True(t, present)
+	assert.Equal(t, "hello", value)
+}
