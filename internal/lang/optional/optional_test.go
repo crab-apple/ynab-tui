@@ -37,7 +37,7 @@ func TestOrShouldReturnValueIfPresent(t *testing.T) {
 	assert.Equal(t, "foo", result)
 }
 
-func TestOrShouldReturnDefaultValueIfEmpry(t *testing.T) {
+func TestOrShouldReturnDefaultValueIfEmpty(t *testing.T) {
 	// Given
 	optional := Empty[string]()
 
