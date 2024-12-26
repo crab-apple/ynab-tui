@@ -31,7 +31,7 @@ var (
 	}
 )
 
-func MakeTransaction(account *ynabmodel.Account, category optional.Optional[ynabmodel.Category], dateStr string, amount string, memo string) ynabmodel.Transaction {
+func MakeTransaction(account ynabmodel.Account, category optional.Optional[ynabmodel.Category], dateStr string, amount string, memo string) ynabmodel.Transaction {
 
 	d, err := date.Parse(dateStr)
 	if err != nil {

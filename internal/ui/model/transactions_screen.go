@@ -1,7 +1,35 @@
 package model
 
-import "ynabtui/internal/ynabmodel"
+import (
+	"github.com/samber/lo"
+	"ynabtui/internal/ynabmodel"
+)
 
 type TransactionsScreen struct {
 	Transactions []ynabmodel.Transaction
+}
+
+func (ts TransactionsScreen) Table() Table {
+	return Table{
+		Columns: []Column{
+			{key: "date", display: "Date"},
+			{key: "account", display: "Account"},
+			{key: "category", display: "Category"},
+			{key: "amount", display: "Amount"},
+			{key: "memo", display: "Memo"},
+		},
+		Rows: lo.Map(ts.Transactions, func(t ynabmodel.Transaction, i int) Row {
+			row := make(Row)
+			row["account"] = t.AccountName
+			row["category"] = t.CategoryName.Or("")
+			row["date"] = t.Date.String()
+			row["amount"] = t.Amount.Format()
+			row["memo"] = t.Memo
+			return row
+		}),
+	}
+}
+
+func NewTransactionsScreen(transactions []ynabmodel.Transaction) *TransactionsScreen {
+	return &TransactionsScreen{Transactions: transactions}
 }
