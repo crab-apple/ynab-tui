@@ -6,8 +6,16 @@ type Table struct {
 }
 
 type Column struct {
-	Key     string
-	Display string
+	Key       string
+	Display   string
+	CellAlign Align
 }
 
 type Row map[string]string
+
+type Align int
+
+const (
+	AlignLeft  Align = iota
+	AlignRight Align = iota
+)

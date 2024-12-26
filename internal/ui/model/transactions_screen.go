@@ -15,7 +15,7 @@ func (ts TransactionsScreen) Table() Table {
 			{Key: "date", Display: "Date"},
 			{Key: "account", Display: "Account"},
 			{Key: "category", Display: "Category"},
-			{Key: "amount", Display: "Amount"},
+			{Key: "amount", Display: "Amount", CellAlign: AlignRight},
 			{Key: "memo", Display: "Memo"},
 		},
 		Rows: lo.Map(ts.Transactions, func(t ynabmodel.Transaction, i int) Row {
