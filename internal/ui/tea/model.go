@@ -15,8 +15,7 @@ import (
 type Model struct {
 	uiModel tea.UI
 
-	transactions []ynabmodel.Transaction
-	table        responsivetable.Model
+	table responsivetable.Model
 }
 
 type updateScreenMsg struct {
@@ -33,19 +32,9 @@ func InitialModel(api ynabapi.YnabApi) Model {
 
 	t.SetHeight(15)
 
-	columns := []responsivetable.Column{
-		{Title: "Date"},
-		{Title: "Account"},
-		{Title: "Category"},
-		{Title: "Amount"},
-		{Title: "Memo"},
-	}
-	t.SetColumns(columns)
-
 	return Model{
-		uiModel:      uiModel,
-		transactions: nil,
-		table:        t,
+		uiModel: uiModel,
+		table:   t,
 	}
 }
 
@@ -66,8 +55,17 @@ func (m Model) Update(msg btea.Msg) (btea.Model, btea.Cmd) {
 	case updateScreenMsg:
 		switch screen := msg.screen.(type) {
 		case tea.TransactionsScreen:
-			m.transactions = screen.Transactions
-			rows := lo.Map(m.transactions, func(item ynabmodel.Transaction, i int) table.Row {
+
+			columns := []responsivetable.Column{
+				{Title: "Date"},
+				{Title: "Account"},
+				{Title: "Category"},
+				{Title: "Amount"},
+				{Title: "Memo"},
+			}
+			m.table.SetColumns(columns)
+
+			rows := lo.Map(screen.Transactions, func(item ynabmodel.Transaction, i int) table.Row {
 				return makeTransactionRow(item)
 			})
 			m.table.SetRows(rows)
