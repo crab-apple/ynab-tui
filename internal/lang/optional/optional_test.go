@@ -48,7 +48,7 @@ func TestOrShouldReturnDefaultValueIfEmpty(t *testing.T) {
 	assert.Equal(t, "default", result)
 }
 
-func TestShouldCreateEmptyFromNilPointer(t *testing.T) {
+func TestOfPointerShouldCreateEmptyFromNilPointer(t *testing.T) {
 	// Given
 	var pointer *string = nil
 
@@ -60,7 +60,7 @@ func TestShouldCreateEmptyFromNilPointer(t *testing.T) {
 	assert.False(t, present)
 }
 
-func TestShouldCreatePresentFromNonNilPointer(t *testing.T) {
+func TestOfPointerShouldCreatePresentFromNonNilPointer(t *testing.T) {
 	// Given
 	str := "hello"
 	var pointer *string = &str
@@ -72,4 +72,25 @@ func TestShouldCreatePresentFromNonNilPointer(t *testing.T) {
 	value, present := result.Get()
 	assert.True(t, present)
 	assert.Equal(t, "hello", value)
+}
+
+func TestAsPointerShouldReturnNilPointerIfEmpty(t *testing.T) {
+	// Given
+	opt := Empty[string]()
+
+	// When
+	pointer := opt.AsPointer()
+
+	// Then
+	assert.Nil(t, pointer)
+}
+func TestAsPointerShouldReturnPointerToValueIfPresent(t *testing.T) {
+	// Given
+	opt := Of("hello")
+
+	// When
+	pointer := opt.AsPointer()
+
+	// Then
+	assert.Equal(t, "hello", *pointer)
 }

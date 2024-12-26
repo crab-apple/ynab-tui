@@ -16,6 +16,13 @@ func (o Optional[Value]) Or(deflt Value) Value {
 	return deflt
 }
 
+func (o Optional[Value]) AsPointer() *Value {
+	if o.exists {
+		return &o.value
+	}
+	return nil
+}
+
 func Empty[Value any]() Optional[Value] {
 	var empty Value
 	return Optional[Value]{empty, false}
