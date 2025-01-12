@@ -5,7 +5,9 @@ go 1.23.0
 require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.1.1
+	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/charmbracelet/x/exp/teatest v0.0.0-20241004173542-8f764644629a
+	github.com/evertras/bubble-table v0.17.1
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.3.0
 	github.com/oapi-codegen/runtime v1.1.1
@@ -17,9 +19,9 @@ require (
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
+	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymanbagabas/go-udiff v0.2.0 // indirect
-	github.com/charmbracelet/lipgloss v0.13.0 // indirect
 	github.com/charmbracelet/x/ansi v0.2.3 // indirect
 	github.com/charmbracelet/x/exp/golden v0.0.0-20240815200342-61de596daa2b // indirect
 	github.com/charmbracelet/x/term v0.2.0 // indirect
@@ -38,6 +40,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -1,92 +1,111 @@
 package tea
 
 import (
-	"fmt"
-	"github.com/charmbracelet/bubbles/table"
-	btea "github.com/charmbracelet/bubbletea"
 	"github.com/samber/lo"
-	"log/slog"
 	uimodel "ynabtui/internal/ui/model"
-	"ynabtui/internal/ui/tea/components/responsivetable"
 	"ynabtui/internal/ynabapi"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
 )
 
-type Model struct {
-	uiModel uimodel.UI
-
-	table responsivetable.Model
-}
+const (
+	fixedVerticalMargin = 2
+)
 
 type updateScreenMsg struct {
 	screen any
+}
+
+type Model struct {
+	uiModel   uimodel.UI
+	flexTable table.Model
 }
 
 func InitialModel(api ynabapi.YnabApi) Model {
 
 	uiModel := uimodel.NewUI(api)
 
-	t := responsivetable.New(
-		table.WithFocused(true),
-	)
-
-	t.SetHeight(15)
-
 	return Model{
 		uiModel: uiModel,
-		table:   t,
+		flexTable: table.New([]table.Column{
+			table.NewFlexColumn("a", "Pending", 1),
+			table.NewFlexColumn("b", "Pending", 1),
+			table.NewFlexColumn("c", "Pending", 1),
+		}).WithStaticFooter("A footer!"),
 	}
 }
 
-func (m Model) Init() btea.Cmd {
-	return func() btea.Msg {
+func (m Model) Init() tea.Cmd {
+	return func() tea.Msg {
 		screen := m.uiModel.FirstLoad()
 		return updateScreenMsg{
 			screen: screen,
 		}
 	}
 }
-func (m Model) Update(msg btea.Msg) (btea.Model, btea.Cmd) {
 
-	slog.Debug("Received message", "type", fmt.Sprintf("%T", msg), "value", msg)
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
+	m.flexTable, cmd = m.flexTable.Update(msg)
+	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
 
 	case updateScreenMsg:
-		switch screen := msg.screen.(type) {
+		switch msg.screen.(type) {
+
 		case uimodel.TransactionsScreen:
 
-			m.table.SetColumns(lo.Map(screen.Table().Columns, func(col uimodel.Column, _ int) responsivetable.Column {
-				return responsivetable.Column{Title: col.Display}
+			screen := msg.screen.(uimodel.TransactionsScreen)
+
+			m.flexTable = m.flexTable.WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) table.Column {
+				return table.NewFlexColumn(column.Key, column.Display, 1)
 			}))
 
-			m.table.SetRows(
-				lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
-					return lo.Map(screen.Table().Columns, func(col uimodel.Column, _ int) string {
-						return row[col.Key]
-					})
-				}))
+			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
+
+				var newRow map[string]interface{}
+
+				var oldRow map[string]string
+
+				oldRow = row
+
+				newRow = make(map[string]interface{})
+
+				for _, key := range lo.Keys(oldRow) {
+					newRow[key] = oldRow[key]
+				}
+				return table.NewRow(newRow)
+			}))
 		}
 
-	case btea.WindowSizeMsg:
-		m.table.SetWidth(msg.Width)
-		m.table.SetHeight(msg.Height)
-
-	// Is it a key press?
-	case btea.KeyMsg:
-
-		// Cool, what was the actual key pressed?
+	case tea.KeyMsg:
 		switch msg.String() {
-
-		// These keys should exit the program.
-		case "ctrl+c", "q":
-			return m, btea.Quit
+		case "q":
+			cmds = append(cmds, tea.Quit)
 		}
+
+	case tea.WindowSizeMsg:
+		m.flexTable = m.flexTable.
+			WithTargetWidth(msg.Width).
+			WithMinimumHeight(msg.Height - fixedVerticalMargin)
 	}
 
-	// Return the updated Model to the Bubble Tea runtime for processing.
-	// Note that we're not returning a command.
-	return m, nil
+	return m, tea.Batch(cmds...)
 }
+
 func (m Model) View() string {
-	return m.table.View()
+	strs := []string{
+		m.flexTable.View(),
+		"Press q to quit",
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Left, strs...) + "\n"
 }
