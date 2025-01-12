@@ -65,9 +65,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			screen := msg.screen.(uimodel.TransactionsScreen)
 
-			m.flexTable = m.flexTable.WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) table.Column {
-				return table.NewFlexColumn(column.Key, column.Display, 1)
-			}))
+			m.flexTable = m.flexTable.
+				HeaderStyle(lipgloss.NewStyle().Bold(true).AlignHorizontal(lipgloss.Left)).
+				WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) table.Column {
+					displayColumn := table.NewFlexColumn(column.Key, column.Display, 1).
+						WithStyle(lipgloss.NewStyle().AlignHorizontal(lipgloss.Left))
+
+					if column.CellAlign == uimodel.AlignRight {
+						displayColumn = displayColumn.WithStyle(displayColumn.Style().AlignHorizontal(lipgloss.Right))
+					}
+					return displayColumn
+				}))
 
 			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
 				return table.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
