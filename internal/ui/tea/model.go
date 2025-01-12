@@ -70,19 +70,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}))
 
 			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
-
-				var newRow map[string]interface{}
-
-				var oldRow map[string]string
-
-				oldRow = row
-
-				newRow = make(map[string]interface{})
-
-				for _, key := range lo.Keys(oldRow) {
-					newRow[key] = oldRow[key]
-				}
-				return table.NewRow(newRow)
+				return table.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
+					return value
+				}))
 			}))
 		}
 
