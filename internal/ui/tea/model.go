@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
+	btable "github.com/evertras/bubble-table/table"
 )
 
 const (
@@ -20,7 +20,7 @@ type updateScreenMsg struct {
 
 type Model struct {
 	uiModel   uimodel.UI
-	flexTable table.Model
+	flexTable btable.Model
 }
 
 func InitialModel(api ynabapi.YnabApi) Model {
@@ -29,10 +29,10 @@ func InitialModel(api ynabapi.YnabApi) Model {
 
 	return Model{
 		uiModel: uiModel,
-		flexTable: table.New([]table.Column{
-			table.NewFlexColumn("a", "Pending", 1),
-			table.NewFlexColumn("b", "Pending", 1),
-			table.NewFlexColumn("c", "Pending", 1),
+		flexTable: btable.New([]btable.Column{
+			btable.NewFlexColumn("a", "Pending", 1),
+			btable.NewFlexColumn("b", "Pending", 1),
+			btable.NewFlexColumn("c", "Pending", 1),
 		}).WithStaticFooter("A footer!"),
 	}
 }
@@ -67,8 +67,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.flexTable = m.flexTable.
 				HeaderStyle(lipgloss.NewStyle().Bold(true).AlignHorizontal(lipgloss.Left)).
-				WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) table.Column {
-					displayColumn := table.NewFlexColumn(column.Key, column.Display, 1).
+				WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) btable.Column {
+					displayColumn := btable.NewFlexColumn(column.Key, column.Display, 1).
 						WithStyle(lipgloss.NewStyle().AlignHorizontal(lipgloss.Left))
 
 					if column.CellAlign == uimodel.AlignRight {
@@ -77,8 +77,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return displayColumn
 				}))
 
-			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) table.Row {
-				return table.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
+			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) btable.Row {
+				return btable.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
 					return value
 				}))
 			}))
