@@ -62,26 +62,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.screen.(type) {
 
 		case uimodel.TransactionsScreen:
-
-			screen := msg.screen.(uimodel.TransactionsScreen)
-
-			m.flexTable = m.flexTable.
-				HeaderStyle(lipgloss.NewStyle().Bold(true).AlignHorizontal(lipgloss.Left)).
-				WithColumns(lo.Map(screen.Table().Columns, func(column uimodel.Column, _ int) btable.Column {
-					displayColumn := btable.NewFlexColumn(column.Key, column.Display, 1).
-						WithStyle(lipgloss.NewStyle().AlignHorizontal(lipgloss.Left))
-
-					if column.CellAlign == uimodel.AlignRight {
-						displayColumn = displayColumn.WithStyle(displayColumn.Style().AlignHorizontal(lipgloss.Right))
-					}
-					return displayColumn
-				}))
-
-			m.flexTable = m.flexTable.WithRows(lo.Map(screen.Table().Rows, func(row uimodel.Row, _ int) btable.Row {
-				return btable.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
-					return value
-				}))
-			}))
+			m.flexTable = updateDisplayTable(m.flexTable, msg.screen.(uimodel.TransactionsScreen).Table())
 		}
 
 	case tea.KeyMsg:
@@ -91,12 +72,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		m.flexTable = m.flexTable.
-			WithTargetWidth(msg.Width).
-			WithMinimumHeight(msg.Height - fixedVerticalMargin)
+		m.flexTable = resizeDisplayTable(m.flexTable, msg.Width, msg.Height)
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func updateDisplayTable(prev btable.Model, table uimodel.Table) btable.Model {
+	result := prev.
+		HeaderStyle(lipgloss.NewStyle().Bold(true).AlignHorizontal(lipgloss.Left)).
+		WithColumns(lo.Map(table.Columns, func(column uimodel.Column, _ int) btable.Column {
+			displayColumn := btable.NewFlexColumn(column.Key, column.Display, 1).
+				WithStyle(lipgloss.NewStyle().AlignHorizontal(lipgloss.Left))
+
+			if column.CellAlign == uimodel.AlignRight {
+				displayColumn = displayColumn.WithStyle(displayColumn.Style().AlignHorizontal(lipgloss.Right))
+			}
+			return displayColumn
+		}))
+
+	result = result.WithRows(lo.Map(table.Rows, func(row uimodel.Row, _ int) btable.Row {
+		return btable.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
+			return value
+		}))
+	}))
+	return result
+}
+
+func resizeDisplayTable(table btable.Model, width int, h int) btable.Model {
+	return table.
+		WithTargetWidth(width).
+		WithMinimumHeight(h - fixedVerticalMargin)
 }
 
 func (m Model) View() string {
