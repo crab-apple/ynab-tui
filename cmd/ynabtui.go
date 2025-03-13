@@ -2,10 +2,10 @@ package main
 
 import (
 	"os"
+	"ynabtui/driven_adapters/for_communicating_with_ynab/ynabclient"
 	"ynabtui/internal/app"
 	"ynabtui/internal/files"
 	"ynabtui/internal/settings"
-	"ynabtui/internal/ynabapi"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	api, err := ynabapi.NewClient("https://api.ynab.com/v1", accessToken)
+	api, err := ynabclient.NewClient("https://api.ynab.com/v1", accessToken)
 	if err != nil {
 		panic(err)
 	}
