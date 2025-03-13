@@ -8,10 +8,10 @@ import (
 	openapitypes "github.com/oapi-codegen/runtime/types"
 	"github.com/samber/lo"
 	"net/http"
+	"ynabtui/app/app/lang/optional"
 	ynabmodel2 "ynabtui/app/app/ynabmodel"
 	"ynabtui/app/app/ynabmodel/date"
 	"ynabtui/driven_adapters/for_communicating_with_ynab/ynabclient/ynabclientgen"
-	"ynabtui/internal/lang/optional"
 )
 
 type YnabClient struct {
