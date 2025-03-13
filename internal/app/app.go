@@ -6,12 +6,12 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"ynabtui/app/driven_ports"
 	"ynabtui/internal/files"
 	tea2 "ynabtui/internal/ui/tea"
-	"ynabtui/internal/ynabapi"
 )
 
-func RunApp(input io.Reader, output io.Writer, api ynabapi.YnabApi, appFiles files.AppFiles) {
+func RunApp(input io.Reader, output io.Writer, api driven_ports.ForCommunicatingWithYnab, appFiles files.AppFiles) {
 
 	defer setUpLogging(appFiles)()
 

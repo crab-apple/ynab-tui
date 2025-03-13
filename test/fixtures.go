@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"math/rand"
+	"ynabtui/app/app/ynabmodel"
+	"ynabtui/app/app/ynabmodel/date"
 	"ynabtui/internal/lang/optional"
-	"ynabtui/internal/ynabmodel"
-	"ynabtui/internal/ynabmodel/date"
 )
 
 var (

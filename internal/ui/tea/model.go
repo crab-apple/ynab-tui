@@ -1,13 +1,12 @@
 package tea
 
 import (
-	"github.com/samber/lo"
-	uimodel "ynabtui/internal/ui/model"
-	"ynabtui/internal/ynabapi"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	btable "github.com/evertras/bubble-table/table"
+	"github.com/samber/lo"
+	"ynabtui/app/driven_ports"
+	uimodel "ynabtui/internal/ui/model"
 )
 
 const (
@@ -23,7 +22,7 @@ type Model struct {
 	flexTable btable.Model
 }
 
-func InitialModel(api ynabapi.YnabApi) Model {
+func InitialModel(api driven_ports.ForCommunicatingWithYnab) Model {
 
 	uiModel := uimodel.NewUI(api)
 

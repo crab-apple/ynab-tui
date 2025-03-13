@@ -1,12 +1,12 @@
-package ynabapi
+package driven_ports
 
 import (
 	"github.com/google/uuid"
-	"ynabtui/internal/ynabmodel"
-	"ynabtui/internal/ynabmodel/date"
+	"ynabtui/app/app/ynabmodel"
+	"ynabtui/app/app/ynabmodel/date"
 )
 
-type YnabApi interface {
+type ForCommunicatingWithYnab interface {
 	ReadBudgets() ([]ynabmodel.Budget, error)
 	ReadTransactions(budgetId uuid.UUID, since date.Date) ([]ynabmodel.Transaction, error)
 }

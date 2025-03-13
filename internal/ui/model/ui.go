@@ -2,16 +2,16 @@ package model
 
 import (
 	"github.com/samber/lo"
-	"ynabtui/internal/ynabapi"
-	"ynabtui/internal/ynabmodel"
-	"ynabtui/internal/ynabmodel/date"
+	"ynabtui/app/app/ynabmodel"
+	"ynabtui/app/app/ynabmodel/date"
+	"ynabtui/app/driven_ports"
 )
 
 type UI struct {
-	api ynabapi.YnabApi
+	api driven_ports.ForCommunicatingWithYnab
 }
 
-func NewUI(api ynabapi.YnabApi) UI {
+func NewUI(api driven_ports.ForCommunicatingWithYnab) UI {
 	return UI{api: api}
 }
 

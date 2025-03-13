@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/samber/lo"
-	"ynabtui/internal/ynabmodel"
+	"ynabtui/app/app/ynabmodel"
 )
 
 type TransactionsScreen struct {

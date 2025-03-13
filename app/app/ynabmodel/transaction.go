@@ -2,8 +2,8 @@ package ynabmodel
 
 import (
 	"github.com/google/uuid"
+	"ynabtui/app/app/ynabmodel/date"
 	"ynabtui/internal/lang/optional"
-	"ynabtui/internal/ynabmodel/date"
 )
 
 type Transaction struct {

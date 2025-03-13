@@ -8,10 +8,10 @@ import (
 	openapitypes "github.com/oapi-codegen/runtime/types"
 	"github.com/samber/lo"
 	"net/http"
+	ynabmodel2 "ynabtui/app/app/ynabmodel"
+	"ynabtui/app/app/ynabmodel/date"
 	"ynabtui/internal/lang/optional"
 	"ynabtui/internal/ynabclientgen"
-	"ynabtui/internal/ynabmodel"
-	"ynabtui/internal/ynabmodel/date"
 )
 
 type YnabClient struct {
@@ -33,7 +33,7 @@ func NewClient(apiUri string, token string) (YnabClient, error) {
 	return YnabClient{clientGen: gcr}, nil
 }
 
-func (c YnabClient) ReadBudgets() ([]ynabmodel.Budget, error) {
+func (c YnabClient) ReadBudgets() ([]ynabmodel2.Budget, error) {
 
 	res, err := c.clientGen.GetBudgetsWithResponse(context.TODO(), nil)
 
@@ -44,15 +44,15 @@ func (c YnabClient) ReadBudgets() ([]ynabmodel.Budget, error) {
 		return nil, fmt.Errorf("expected HTTP 200 but received %d", res.StatusCode())
 	}
 
-	return lo.Map(res.JSON200.Data.Budgets, func(item ynabclientgen.BudgetSummary, index int) ynabmodel.Budget {
-		return ynabmodel.Budget{
+	return lo.Map(res.JSON200.Data.Budgets, func(item ynabclientgen.BudgetSummary, index int) ynabmodel2.Budget {
+		return ynabmodel2.Budget{
 			Id:             item.Id,
 			LastModifiedOn: *item.LastModifiedOn,
 		}
 	}), nil
 }
 
-func (c YnabClient) ReadTransactions(budgetId uuid.UUID, since date.Date) ([]ynabmodel.Transaction, error) {
+func (c YnabClient) ReadTransactions(budgetId uuid.UUID, since date.Date) ([]ynabmodel2.Transaction, error) {
 
 	res, err := c.clientGen.GetTransactionsWithResponse(context.TODO(), budgetId.String(), &ynabclientgen.GetTransactionsParams{
 		SinceDate: &openapitypes.Date{Time: since.Midnight()},
@@ -65,7 +65,7 @@ func (c YnabClient) ReadTransactions(budgetId uuid.UUID, since date.Date) ([]yna
 		return nil, fmt.Errorf("expected HTTP 200 but received %d, %s", res.StatusCode(), res.Body)
 	}
 
-	result := make([]ynabmodel.Transaction, 0)
+	result := make([]ynabmodel2.Transaction, 0)
 
 	for _, t := range res.JSON200.Data.Transactions {
 		mapped, err := mapTransaction(t)
@@ -77,16 +77,16 @@ func (c YnabClient) ReadTransactions(budgetId uuid.UUID, since date.Date) ([]yna
 	return result, nil
 }
 
-func mapTransaction(t ynabclientgen.TransactionDetail) (ynabmodel.Transaction, error) {
+func mapTransaction(t ynabclientgen.TransactionDetail) (ynabmodel2.Transaction, error) {
 
 	d, err := date.FromTime(t.Date.Time)
 	if err != nil {
-		return ynabmodel.Transaction{}, err
+		return ynabmodel2.Transaction{}, err
 	}
 
-	amount, err := ynabmodel.NewMoneyFromThousandths(t.Amount)
+	amount, err := ynabmodel2.NewMoneyFromThousandths(t.Amount)
 	if err != nil {
-		return ynabmodel.Transaction{}, err
+		return ynabmodel2.Transaction{}, err
 	}
 
 	memo := ""
@@ -94,7 +94,7 @@ func mapTransaction(t ynabclientgen.TransactionDetail) (ynabmodel.Transaction, e
 		memo = *t.Memo
 	}
 
-	return ynabmodel.Transaction{
+	return ynabmodel2.Transaction{
 		Id:           t.Id,
 		Date:         d,
 		AccountId:    t.AccountId,

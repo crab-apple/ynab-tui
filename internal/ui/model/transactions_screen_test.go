@@ -4,8 +4,8 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"ynabtui/app/app/ynabmodel"
 	"ynabtui/internal/lang/optional"
-	"ynabtui/internal/ynabmodel"
 	"ynabtui/test"
 )
 
