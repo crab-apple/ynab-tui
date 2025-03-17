@@ -5,8 +5,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	btable "github.com/evertras/bubble-table/table"
 	"github.com/samber/lo"
+	"ynabtui/app/app/ui"
 	"ynabtui/app/driven_ports"
-	uimodel "ynabtui/internal/ui/model"
 )
 
 const (
@@ -18,13 +18,13 @@ type updateScreenMsg struct {
 }
 
 type Model struct {
-	uiModel   uimodel.UI
+	uiModel   ui.UI
 	flexTable btable.Model
 }
 
 func InitialModel(api driven_ports.ForCommunicatingWithYnab) Model {
 
-	uiModel := uimodel.NewUI(api)
+	uiModel := ui.NewUI(api)
 
 	return Model{
 		uiModel: uiModel,
@@ -60,8 +60,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateScreenMsg:
 		switch msg.screen.(type) {
 
-		case uimodel.TransactionsScreen:
-			m.flexTable = updateDisplayTable(m.flexTable, msg.screen.(uimodel.TransactionsScreen).Table())
+		case ui.TransactionsScreen:
+			m.flexTable = updateDisplayTable(m.flexTable, msg.screen.(ui.TransactionsScreen).Table())
 		}
 
 	case tea.KeyMsg:
@@ -77,20 +77,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func updateDisplayTable(prev btable.Model, table uimodel.Table) btable.Model {
+func updateDisplayTable(prev btable.Model, table ui.Table) btable.Model {
 	result := prev.
 		HeaderStyle(lipgloss.NewStyle().Bold(true).AlignHorizontal(lipgloss.Left)).
-		WithColumns(lo.Map(table.Columns, func(column uimodel.Column, _ int) btable.Column {
+		WithColumns(lo.Map(table.Columns, func(column ui.Column, _ int) btable.Column {
 			displayColumn := btable.NewFlexColumn(column.Key, column.Display, 1).
 				WithStyle(lipgloss.NewStyle().AlignHorizontal(lipgloss.Left))
 
-			if column.CellAlign == uimodel.AlignRight {
+			if column.CellAlign == ui.AlignRight {
 				displayColumn = displayColumn.WithStyle(displayColumn.Style().AlignHorizontal(lipgloss.Right))
 			}
 			return displayColumn
 		}))
 
-	result = result.WithRows(lo.Map(table.Rows, func(row uimodel.Row, _ int) btable.Row {
+	result = result.WithRows(lo.Map(table.Rows, func(row ui.Row, _ int) btable.Row {
 		return btable.NewRow(lo.MapValues(row, func(value string, key string) interface{} {
 			return value
 		}))
