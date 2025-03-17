@@ -1,16 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
+	"ynabtui/cmd/files"
+	"ynabtui/cmd/logging"
 	"ynabtui/driven_adapters/for_communicating_with_ynab/ynabclient"
 	"ynabtui/internal/app"
-	"ynabtui/internal/files"
-	"ynabtui/internal/settings"
 )
 
 func main() {
 
-	accessToken, err := settings.ReadAccessToken()
+	defer logging.SetUpLogging()()
+
+	accessToken, err := readAccessToken()
 	if err != nil {
 		panic(err)
 	}
@@ -20,5 +24,13 @@ func main() {
 		panic(err)
 	}
 
-	app.RunApp(os.Stdin, os.Stdout, api, files.AppFilesImpl{})
+	app.RunApp(os.Stdin, os.Stdout, api)
+}
+
+func readAccessToken() (string, error) {
+	c, err := files.ReadYnabConfigFile("access_token")
+	if err != nil {
+		return "", fmt.Errorf("unable to read access token: %w", err)
+	}
+	return strings.TrimSpace(c), nil
 }
