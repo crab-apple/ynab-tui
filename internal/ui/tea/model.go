@@ -7,6 +7,7 @@ import (
 	"github.com/samber/lo"
 	"ynabtui/app/app/ui"
 	"ynabtui/app/driven_ports"
+	"ynabtui/app/driving_ports"
 )
 
 const (
@@ -18,16 +19,16 @@ type updateScreenMsg struct {
 }
 
 type Model struct {
-	uiModel   ui.UI
-	flexTable btable.Model
+	forDisplayingTheScreen driving_ports.ForDisplayingTheScreen
+	flexTable              btable.Model
 }
 
 func InitialModel(api driven_ports.ForCommunicatingWithYnab) Model {
 
-	uiModel := ui.NewUI(api)
+	forDisplayingTheScreen := ui.NewUI(api)
 
 	return Model{
-		uiModel: uiModel,
+		forDisplayingTheScreen: forDisplayingTheScreen,
 		flexTable: btable.New([]btable.Column{
 			btable.NewFlexColumn("a", "Pending", 1),
 			btable.NewFlexColumn("b", "Pending", 1),
@@ -38,7 +39,7 @@ func InitialModel(api driven_ports.ForCommunicatingWithYnab) Model {
 
 func (m Model) Init() tea.Cmd {
 	return func() tea.Msg {
-		screen := m.uiModel.FirstLoad()
+		screen := m.forDisplayingTheScreen.FirstLoad()
 		return updateScreenMsg{
 			screen: screen,
 		}
