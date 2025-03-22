@@ -10,9 +10,9 @@ import (
 	tea2 "ynabtui/internal/ui/tea"
 )
 
-func RunApp(input io.Reader, output io.Writer, api driven_ports.ForCommunicatingWithYnab) {
+func RunApp(input io.Reader, output io.Writer, forCommunicatingWithYnab driven_ports.ForCommunicatingWithYnab) {
 
-	p := tea.NewProgram(tea2.InitialModel(ui.NewUI(api)), tea.WithInput(input), tea.WithOutput(output), tea.WithAltScreen())
+	p := tea.NewProgram(tea2.InitialModel(ui.NewUI(forCommunicatingWithYnab)), tea.WithInput(input), tea.WithOutput(output), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
