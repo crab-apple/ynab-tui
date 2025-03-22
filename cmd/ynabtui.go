@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"ynabtui/cmd/clientsetup"
 	"ynabtui/cmd/logging"
 	"ynabtui/internal/app"
@@ -16,5 +15,5 @@ func main() {
 		panic(err)
 	}
 
-	app.RunApp(os.Stdin, os.Stdout, forCommunicatingWithYnab)
+	app.RunApp(forCommunicatingWithYnab)
 }
