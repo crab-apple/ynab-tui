@@ -4,7 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"ynabtui/cmd/files"
+	"path/filepath"
 )
 
 func SetUpLogging() func() {
@@ -26,7 +26,7 @@ func SetUpLogging() func() {
 }
 
 func getLogWriter() (io.Writer, func(), error) {
-	filePath, err := files.GetAppFile("log")
+	filePath, err := getLogFilePath()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -38,4 +38,12 @@ func getLogWriter() (io.Writer, func(), error) {
 	cleanup := func() { f.Close() }
 
 	return f, cleanup, nil
+}
+
+func getLogFilePath() (string, error) {
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(homedir, ".ynab", "log"), nil
 }
