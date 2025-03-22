@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
+	"os"
+	"ynabtui/app/app"
 	"ynabtui/cmd/clientsetup"
 	"ynabtui/cmd/logging"
-	"ynabtui/internal/app"
+	tea2 "ynabtui/internal/ui/tea"
 )
 
 func main() {
@@ -15,5 +19,11 @@ func main() {
 		panic(err)
 	}
 
-	app.RunApp(forCommunicatingWithYnab)
+	var application = app.NewApp(forCommunicatingWithYnab)
+
+	p := tea.NewProgram(tea2.InitialModel(application.ForDisplayingTheScreen()), tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
+	}
 }
