@@ -6,7 +6,6 @@ import (
 	btable "github.com/evertras/bubble-table/table"
 	"github.com/samber/lo"
 	"ynabtui/app/app/ui"
-	"ynabtui/app/driven_ports"
 	"ynabtui/app/driving_ports"
 )
 
@@ -23,10 +22,7 @@ type Model struct {
 	flexTable              btable.Model
 }
 
-func InitialModel(api driven_ports.ForCommunicatingWithYnab) Model {
-
-	forDisplayingTheScreen := ui.NewUI(api)
-
+func InitialModel(forDisplayingTheScreen driving_ports.ForDisplayingTheScreen) Model {
 	return Model{
 		forDisplayingTheScreen: forDisplayingTheScreen,
 		flexTable: btable.New([]btable.Column{
